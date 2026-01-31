@@ -3,20 +3,16 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags:
-  - projectile
-  - Water
-  - Enemy
-  - Lamp
+  tags: []
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Player
+  - Stands
   - Water
   - UI
-  - Enemy
-  - Clickable
+  - 
+  - 
   - 
   - 
   - 

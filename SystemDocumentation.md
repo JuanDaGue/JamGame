@@ -2,6 +2,32 @@
 
 Este documento detalla la arquitectura, ubicación y propósito de cada script implementado en el proyecto tras la refactorización para la lógica de progresión tipo "Mega Man" (Minijuego -> Recompensa -> Ventaja en otro Minijuego).
 
+## Arquitectura y Flujo de Escenas
+
+Para garantizar que el `InventorySystem` (Singleton) funcione correctamente y no se duplique ni se pierda:
+
+### 1. Secuencia de Escenas
+
+1. **Menu** (Escena Inicial):
+   * **Contenido:** UI de Ingreso.
+   * **Singletons:** Aquí **DEBE** colocarse el GameObject `InventorySystem`. Al iniciar el juego, este objeto se marca como `DontDestroyOnLoad`.
+
+2. **Carnival** (Hub de Selección):
+   * **Contenido:** Stands de Minijuegos (`MinigameStand`).
+   * **Acción:** Al cargar esta escena, el `InventorySystem` que viene del Menu persiste.
+
+3. **Minigames** (Ej: `Duck_Hunter`):
+   * **Contenido:** Lógica del juego (`DuckHunterManager`, `MinigameController`).
+   * **Acción:** Al ganar/perder, regresan a la escena `Carnival`.
+
+### 2. Regla de Oro para el InventorySystem
+
+* **En Producción (Build):** El prefab `InventorySystem` solo debe estar en la escena **Menu**.
+* **En Desarrollo (Editor):** Si quieres probar directamente la escena `Duck_Hunter` sin pasar por el Menu, debes arrastrar temporalmente el prefab `InventorySystem` a la escena.
+  * *Nota:* El script está protegido para autodestruirse si detecta duplicados, así que si por error lo dejas en todas las escenas, no romperá el juego, pero es mejor mantenerlo limpio en la inicial.
+
+---
+
 ## Núcleo (Core) - Definiciones y Eventos
 
 ### 1. GameEvents.cs
