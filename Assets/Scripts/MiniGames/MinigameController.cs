@@ -1,7 +1,7 @@
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using GameJam.Core;
 using GameJam.Systems;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace GameJam.MiniGames
 {
@@ -12,8 +12,22 @@ namespace GameJam.MiniGames
         public CollectibleData rewardMask;
 
         [Header("Navegación")]
-        [Tooltip("Nombre de la escena del Hub para volver")]
-        public string hubSceneName = "Hub";
+#if UNITY_EDITOR
+        [Tooltip("Arrastra aquí el archivo de la escena Hub")]
+        public UnityEditor.SceneAsset hubSceneFile;
+#endif
+        [Tooltip("Nombre de la escena Hub (Automático)")]
+        public string hubSceneName = "Carnival";
+
+        private void OnValidate()
+        {
+#if UNITY_EDITOR
+            if (hubSceneFile != null)
+            {
+                hubSceneName = hubSceneFile.name;
+            }
+#endif
+        }
 
         /// <summary>
         /// Llamar cuando el jugador gana el minijuego.
