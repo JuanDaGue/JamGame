@@ -6,7 +6,19 @@ namespace GameJam.Systems
 {
     public class InventorySystem : MonoBehaviour
     {
-        public static InventorySystem Instance { get; private set; }
+        // Patrón Singleton Persistente (Lazy)
+        private static InventorySystem _instance;
+        public static InventorySystem Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindFirstObjectByType<InventorySystem>();
+                }
+                return _instance;
+            }
+        }
 
         [SerializeField]
         [Tooltip("Items que el jugador tiene al iniciar el juego (Debug/Testing)")]
@@ -18,15 +30,14 @@ namespace GameJam.Systems
 
         private void Awake()
         {
-            // Patrón Singleton Persistente
-            if (Instance != null && Instance != this)
+            if (_instance != null && _instance != this)
             {
-                Destroy(gameObject); // Ya existe uno, nos autodestruimos
+                Destroy(gameObject);
                 return;
             }
 
-            Instance = this;
-            DontDestroyOnLoad(gameObject); // SOBREVIVE AL CAMBIO DE ESCENA
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
 
             Initialize();
         }
