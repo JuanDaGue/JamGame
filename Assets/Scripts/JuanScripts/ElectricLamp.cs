@@ -8,6 +8,7 @@ public class ElectricLamp : MonoBehaviour
     private bool waterElectrified;
     private float electrifyEndTime;
     private Rigidbody rb;
+    public event System.Action OnElectrified;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -27,7 +28,9 @@ public class ElectricLamp : MonoBehaviour
     {
         if (other.CompareTag("Water")) // ponle tag "Water" al trigger/volumen del agua
         {
+            OnElectrified?.Invoke();
             ElectrifyWater();
+            Debug.Log("La lámpara ha sido electrificada al entrar en el agua.");
         }
 
         // Si la lámpara entra al “electrocution zone”, también vale:
@@ -47,6 +50,7 @@ public class ElectricLamp : MonoBehaviour
     {
         waterElectrified = true;
         electrifyEndTime = Time.time + electrifyDuration;
+       
     }
 
     // Llama esto desde un “ElectrocutionZone” dentro del agua (ver abajo)
