@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance => _instance;
 
     // Current game state
-    private GameState _currentState;
+    [SerializeField] private GameState _currentState;
     public GameState CurrentState => _currentState;
 
     // Events for state changes
@@ -40,6 +40,14 @@ public class GameManager : MonoBehaviour
     // Audio sources
     private AudioSource _musicSource;
     private AudioSource _vfxSource;
+
+    // Audio clips (asignar en el inspector)
+    [Header("Audio Clips")]
+    [SerializeField] private AudioClip menuMusic;
+    [SerializeField] private AudioClip gameMusic;
+    [SerializeField] private AudioClip buttonClickSound;
+    [SerializeField] private AudioClip gameOverSound;
+    [SerializeField] private AudioClip victorySound;
 
     // Model reference
     private GameModel _model;
@@ -105,11 +113,13 @@ public class GameManager : MonoBehaviour
         {
             case GameState.InMenu:
                 Time.timeScale = 1f;
+                PlayMenuMusic();
                 break;
                 
             case GameState.InGame:
                 Time.timeScale = 1f;
                 _model.ResetGame();
+                PlayGameMusic();
                 break;
                 
             case GameState.InPause:
@@ -118,11 +128,30 @@ public class GameManager : MonoBehaviour
                 
             case GameState.InGameover:
                 Time.timeScale = 1f;
+                PlayVFX(gameOverSound);
                 break;
                 
             case GameState.InVictory:
                 Time.timeScale = 1f;
+                PlayVFX(victorySound);
                 break;
+        }
+    }
+
+    // Music control
+    private void PlayMenuMusic()
+    {
+        if (menuMusic != null)
+        {
+            PlayMusic(menuMusic);
+        }
+    }
+
+    private void PlayGameMusic()
+    {
+        if (gameMusic != null)
+        {
+            PlayMusic(gameMusic);
         }
     }
 
@@ -137,9 +166,19 @@ public class GameManager : MonoBehaviour
 
     public void PlayVFX(AudioClip clip)
     {
-        if (soundSettings.vfxMuted || soundSettings.masterVolume <= 0) return;
+        if (soundSettings.vfxMuted || soundSettings.masterVolume <= 0 || clip == null) return;
         
         _vfxSource.PlayOneShot(clip, soundSettings.vfxVolume * soundSettings.masterVolume);
+    }
+
+    public void PlayButtonClick()
+    {
+        PlayVFX(buttonClickSound);
+    }
+
+    public void StopMusic()
+    {
+        _musicSource.Stop();
     }
 
     public void SetMasterVolume(float volume)
@@ -220,4 +259,7 @@ public class GameManager : MonoBehaviour
 
     public int GetScore() => _model.Score;
     public int GetLives() => _model.Lives;
+
+    // Get sound settings for UI
+    public SoundSettings GetSoundSettings() => soundSettings;
 }

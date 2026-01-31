@@ -91,7 +91,7 @@ public class EnemyStateController : MonoBehaviour
         }
 
         OnAttack?.Invoke(); // Invocar el evento de ataque
-
+        GameManager.Instance?.GameOver();
         Debug.Log("Enemy cambió de Angry a Attack después de 15s.");
     }
 }

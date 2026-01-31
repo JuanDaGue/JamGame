@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class GameManager : MonoBehaviour
+public class MiniGameManager : MonoBehaviour
 {
     [Header("References")]
     public ShuffleManager shuffleManager;
@@ -274,7 +274,11 @@ public class GameManager : MonoBehaviour
         if (win)
             Debug.Log("WIN");
         else
+        {
+            //GameManager.Instance.GameOver();
+            StartCoroutine(WaitForSeconds(2f));
             Debug.Log("GAME OVER");
+        }
 
         StartCoroutine(ResolveSelection(win));
     }
@@ -320,5 +324,11 @@ public class GameManager : MonoBehaviour
     {
         if (instructionText != null)
             instructionText.text = text;
+    }
+    IEnumerator WaitForSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        GameManager.Instance.GameOver();
+        yield break;
     }
 }
