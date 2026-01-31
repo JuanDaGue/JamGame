@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81e02bf01998d9c4b896df0e52262a12, type: 3}
+  m_Name: PrizeTable
+  m_EditorClassIdentifier: 
+  prizes:
+  - prefab: {fileID: 1433692322714932167, guid: daf15040006f4c7439dfd095e8507b1c, type: 3}
+    probability: 0.3125265
+  - prefab: {fileID: 4133079051345182620, guid: 2dd8763538b93e14d8c301c55bcc08c2, type: 3}
+    probability: 0.68747354
+  normalizeProbabilities: 1
