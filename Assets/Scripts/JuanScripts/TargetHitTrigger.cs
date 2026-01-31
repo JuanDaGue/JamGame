@@ -1,9 +1,9 @@
 using UnityEngine;
-using UnityEngine.Events;
+//using UnityEngine.Events;
 
 public class TargetHitTrigger : MonoBehaviour
 {
-    public UnityEvent OnHit;
+    public event  System.Action  OnHit;
     public bool singleUse = true;
 
     private bool used;
@@ -26,6 +26,7 @@ public class TargetHitTrigger : MonoBehaviour
         if (used && singleUse) return;
         if (collision.collider.CompareTag("projectile"))
         {
+            Debug.Log("Target hit by projectile!");
             used = true;
             OnHit?.Invoke();
         }

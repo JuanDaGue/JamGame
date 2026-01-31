@@ -7,7 +7,14 @@ public class ElectricLamp : MonoBehaviour
 
     private bool waterElectrified;
     private float electrifyEndTime;
+    private Rigidbody rb;
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
 
+    }
     private void Update()
     {
         if (waterElectrified && Time.time >= electrifyEndTime)
@@ -26,6 +33,15 @@ public class ElectricLamp : MonoBehaviour
         // Si la lámpara entra al “electrocution zone”, también vale:
         // if (other.GetComponent<WaterTrigger>() != null) ElectrifyWater();
     }
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("projectile")) // ponle tag "Water" al trigger/volumen del agu
+        {
+            rb.isKinematic = false;
+            rb.useGravity = true;
+            Debug.Log("La lámpara ha sido derribada por un proyectil.");
+        }
+    }
 
     void ElectrifyWater()
     {
@@ -35,4 +51,5 @@ public class ElectricLamp : MonoBehaviour
 
     // Llama esto desde un “ElectrocutionZone” dentro del agua (ver abajo)
     public bool IsWaterElectrified() => waterElectrified;
+
 }

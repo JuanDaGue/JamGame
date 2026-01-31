@@ -29,6 +29,6 @@ public class MouseLook : MonoBehaviour
         transform.localEulerAngles = new Vector3(rotationY, transform.localEulerAngles.y, 0f);
 
         // Debugs
-        Debug.Log($"MouseX: {mouseX}, MouseY: {mouseY}, RotationY: {rotationY}");
+        //Debug.Log($"MouseX: {mouseX}, MouseY: {mouseY}, RotationY: {rotationY}");
     }
 }

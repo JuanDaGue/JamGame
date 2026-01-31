@@ -28,7 +28,7 @@ public class SemiCircularMover : MonoBehaviour
         if (t <= 0f) { t = 0f; dir = 1; }
 
         float angle = Mathf.Lerp(startAngleDeg, endAngleDeg, t) * Mathf.Deg2Rad;
-        Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+        Vector3 offset = new Vector3(0f,Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
 
         transform.position = center.position + offset;
     }

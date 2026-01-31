@@ -1,3 +1,4 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class SlingshotLauncher : MonoBehaviour
@@ -36,7 +37,8 @@ public class SlingshotLauncher : MonoBehaviour
             if (elapsed >= chargeTime)
             {
                 charging = false;
-                Fire(Camera.main.transform.forward, currentCharge);
+                Vector3 dir = (Camera.main.transform.forward + Camera.main.transform.up * 0.3f).normalized;
+                Fire(dir, currentCharge);
                 //Debug.Log("Disparo automático por tiempo máximo.");
             }
         }
