@@ -63,6 +63,7 @@ namespace GameJam.MiniGames
         public void ReturnToHub()
         {
             SceneManager.LoadScene(hubSceneName);
+            //GameManager.Instance.GameOver();
         }
     }
 }

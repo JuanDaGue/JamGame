@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using GameJam.MiniGames;
 
 [DisallowMultipleComponent]
 public class MiniGameManager : MonoBehaviour
@@ -10,6 +11,10 @@ public class MiniGameManager : MonoBehaviour
     [Header("References")]
     public ShuffleManager shuffleManager;
     public List<Cup> cups = new List<Cup>();
+
+    [Header("Progression / Scene Flow (NEW)")]
+    [Tooltip("Referencia al MinigameController de esta escena (recomendado asignarlo en Inspector).")]
+    public MinigameController minigameController;
 
     [Header("Round Parameters")]
     [Tooltip("Tiempo que las bolas permanecen visibles al inicio.")]
@@ -52,10 +57,6 @@ public class MiniGameManager : MonoBehaviour
     private bool _roundActive;
     private bool _canSelect;
 
-    // ======================================================
-    // UNITY
-    // ======================================================
-
     void Reset()
     {
         if (shuffleManager == null)
@@ -64,13 +65,16 @@ public class MiniGameManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("[GameManager] Start()");
+        Debug.Log("[MiniGameManager] Start()");
+
+        if (minigameController == null)
+            minigameController = FindFirstObjectByType<MinigameController>();
 
         if (shuffleManager == null)
-            Debug.LogError("[GameManager] ShuffleManager no asignado.");
+            Debug.LogError("[MiniGameManager] ShuffleManager no asignado.");
 
         if (cups == null || cups.Count == 0)
-            Debug.LogError("[GameManager] Cups no asignados.");
+            Debug.LogError("[MiniGameManager] Cups no asignados.");
 
         // Reset fuerte inicial
         foreach (var cup in cups)
@@ -105,10 +109,9 @@ public class MiniGameManager : MonoBehaviour
 
         UpdateInstruction("Pulsa iniciar para jugar");
 
-        // Auto start si lo quieres para testing
         if (autoStart)
         {
-            Debug.Log("[GameManager] autoStart=true -> arrancando StartRound()");
+            Debug.Log("[MiniGameManager] autoStart=true -> arrancando StartRound()");
             StartRound();
         }
     }
@@ -121,20 +124,19 @@ public class MiniGameManager : MonoBehaviour
     {
         if (_roundActive)
         {
-            Debug.Log("[GameManager] StartRound() ignorado: ya hay una ronda activa.");
+            Debug.Log("[MiniGameManager] StartRound() ignorado: ya hay una ronda activa.");
             return;
         }
 
-        // sanity checks
         if (cups == null || cups.Count == 0)
         {
-            Debug.LogError("[GameManager] StartRound(): no hay cups asignados.");
+            Debug.LogError("[MiniGameManager] StartRound(): no hay cups asignados.");
             return;
         }
 
         if (shuffleManager == null)
         {
-            Debug.LogWarning("[GameManager] StartRound(): ShuffleManager no asignado. La ronda seguirá sin mezclar.");
+            Debug.LogWarning("[MiniGameManager] StartRound(): ShuffleManager no asignado. La ronda seguirá sin mezclar.");
         }
 
         StartCoroutine(RoundCoroutine());
@@ -145,11 +147,10 @@ public class MiniGameManager : MonoBehaviour
         _roundActive = true;
         _canSelect = false;
 
-        Debug.Log("[GameManager] RoundCoroutine: empezando ronda.");
+        Debug.Log("[MiniGameManager] RoundCoroutine: empezando ronda.");
         UpdateInstruction("Observa dónde están las bolas…");
         OnRoundStarted?.Invoke();
 
-        // Reset total
         ClearAllBalls();
         foreach (var cup in cups)
         {
@@ -181,15 +182,14 @@ public class MiniGameManager : MonoBehaviour
         // 🔀 Shuffle
         if (shuffleManager != null)
         {
-            // asegurar snap inicial y que positions estén bien
             shuffleManager.SnapCupsToPositions();
-            Debug.Log("[GameManager] Lanzando shuffleManager.StartShuffle()");
+            Debug.Log("[MiniGameManager] Lanzando shuffleManager.StartShuffle()");
             UpdateInstruction("Mezclando…");
             shuffleManager.StartShuffle();
         }
         else
         {
-            Debug.Log("[GameManager] No hay ShuffleManager -> OnShuffleFinished() directo.");
+            Debug.Log("[MiniGameManager] No hay ShuffleManager -> OnShuffleFinished() directo.");
             OnShuffleFinished();
         }
     }
@@ -206,7 +206,6 @@ public class MiniGameManager : MonoBehaviour
         for (int i = 0; i < cups.Count; i++)
             indices.Add(i);
 
-        // Fisher–Yates
         for (int i = 0; i < indices.Count; i++)
         {
             int j = Random.Range(i, indices.Count);
@@ -217,7 +216,7 @@ public class MiniGameManager : MonoBehaviour
         for (int i = 0; i < maxBalls; i++)
             cups[indices[i]].SetHasBall(true);
 
-        Debug.Log($"[GameManager] AssignBallsRandomly: colocadas {maxBalls} bolas.");
+        Debug.Log($"[MiniGameManager] AssignBallsRandomly: colocadas {maxBalls} bolas.");
     }
 
     private void ClearAllBalls()
@@ -245,7 +244,7 @@ public class MiniGameManager : MonoBehaviour
 
     public void OnShuffleFinished()
     {
-        Debug.Log("[GameManager] OnShuffleFinished() recibida.");
+        Debug.Log("[MiniGameManager] OnShuffleFinished() recibida.");
         _canSelect = true;
 
         foreach (var cup in cups)
@@ -261,28 +260,17 @@ public class MiniGameManager : MonoBehaviour
 
         _canSelect = false;
 
-        // Bloquear todos inmediatamente
         foreach (var c in cups)
             c.selectable = false;
 
-        // Levantar SOLO el vaso clickeado
         cup.LiftAndLock();
 
         bool win = !cup.hasBall;
 
-        // 🔥 OUTPUT DE ESTADO (por ahora solo consola)
-        if (win)
-            Debug.Log("WIN");
-        else
-        {
-            //GameManager.Instance.GameOver();
-            StartCoroutine(WaitForSeconds(2f));
-            Debug.Log("GAME OVER");
-        }
+        Debug.Log(win ? "[MiniGameManager] WIN" : "[MiniGameManager] LOSE");
 
         StartCoroutine(ResolveSelection(win));
     }
-
 
     private IEnumerator ResolveSelection(bool playerWon)
     {
@@ -291,7 +279,6 @@ public class MiniGameManager : MonoBehaviour
         if (audioSource && revealAllClip)
             audioSource.PlayOneShot(revealAllClip);
 
-        // Reveal final
         foreach (var cup in cups)
         {
             cup.SetBallVisible(cup.hasBall);
@@ -310,10 +297,24 @@ public class MiniGameManager : MonoBehaviour
         if (playerWon) OnRoundFinishedWin?.Invoke();
         else OnRoundFinishedLose?.Invoke();
 
+        // Pequeña pausa para feedback
         yield return new WaitForSeconds(1f);
 
         _roundActive = false;
         UpdateInstruction("Pulsa iniciar para jugar de nuevo");
+
+        // NEW SYSTEM HOOK:
+        // Al terminar la ronda, enviamos resultado al sistema global y volvemos al Hub.
+        // Si quieres permitir "reintentar" sin salir, coméntalo y maneja el retorno desde UI.
+        if (minigameController != null)
+        {
+            if (playerWon) minigameController.WinGame();
+            else minigameController.LoseGame();
+        }
+        else
+        {
+            Debug.LogWarning("[MiniGameManager] No se encontró MinigameController. No se puede volver al Hub.");
+        }
     }
 
     // ======================================================
@@ -324,11 +325,5 @@ public class MiniGameManager : MonoBehaviour
     {
         if (instructionText != null)
             instructionText.text = text;
-    }
-    IEnumerator WaitForSeconds(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        GameManager.Instance.GameOver();
-        yield break;
     }
 }
