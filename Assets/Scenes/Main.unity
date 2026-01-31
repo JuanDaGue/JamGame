@@ -323,7 +323,7 @@ MonoBehaviour:
   cam: {fileID: 684153601}
   clickableLayers:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 128
   maxDistance: 200
   preventDoubleLoad: 1
   loadAdditive: 0
@@ -390,10 +390,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 932247973805d9c40a80086bfa6c1388, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: 
+  sceneName: Maquina
   clickable: 1
   buildIndexOverride: -1
   highlightObject: {fileID: 0}
+--- !u!65 &188937045
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188937037}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.11160077, y: 0.1364096, z: 0.1670528}
+  m_Center: {x: 0.0005967021, y: 0.000382699, z: -0.016906165}
 --- !u!1 &457422748
 GameObject:
   m_ObjectHideFlags: 0
@@ -1214,10 +1235,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 932247973805d9c40a80086bfa6c1388, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: 
+  sceneName: JuanDScene
   clickable: 1
   buildIndexOverride: -1
   highlightObject: {fileID: 0}
+--- !u!65 &1236992130
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1236992122}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.11160078, y: 0.13640964, z: 0.16705285}
+  m_Center: {x: 0.0005967021, y: 0.0003826411, z: -0.016906168}
 --- !u!4 &1466582756 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5873797594874632643, guid: 1e4dc4f6bcd487a4fa6923b77eda52c4, type: 3}
@@ -3972,7 +4014,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 6e1d19631ba65894698f7d216e9081a5, type: 2}
     - target: {fileID: 1340904835366349282, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1347674529396242930, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -4636,7 +4678,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: e12fd529a35bae648bbdc7532ba81ac9, type: 2}
     - target: {fileID: 4867585565923076126, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4876285997155681295, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -5016,7 +5058,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 6e1d19631ba65894698f7d216e9081a5, type: 2}
     - target: {fileID: 6806917897543925442, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6820944968781844497, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -5104,7 +5146,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7059568332323322109, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7086669514329510703, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -5557,9 +5599,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6806917897543925442, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2010944502}
+    - targetCorrespondingSourceObject: {fileID: 6806917897543925442, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2010944506}
     - targetCorrespondingSourceObject: {fileID: 7059568332323322109, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 188937041}
+    - targetCorrespondingSourceObject: {fileID: 7059568332323322109, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 188937045}
     - targetCorrespondingSourceObject: {fileID: 4867585565923076126, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1779500473}
@@ -5569,6 +5617,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1340904835366349282, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1236992126}
+    - targetCorrespondingSourceObject: {fileID: 1340904835366349282, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1236992130}
   m_SourcePrefab: {fileID: 100100000, guid: b146259f720589c41981ae33cdca9b5f, type: 3}
 --- !u!1 &1965764047
 GameObject:
@@ -5684,6 +5735,27 @@ MonoBehaviour:
   clickable: 1
   buildIndexOverride: -1
   highlightObject: {fileID: 0}
+--- !u!65 &2010944506
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2010944498}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.11160078, y: 0.13640963, z: 0.16705284}
+  m_Center: {x: 0.0005967021, y: 0.0003826399, z: -0.016906168}
 --- !u!1 &2051095894
 GameObject:
   m_ObjectHideFlags: 0

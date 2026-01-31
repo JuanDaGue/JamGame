@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class GameManager : MonoBehaviour
+public class MiniGameManager : MonoBehaviour
 {
     [Header("References")]
     public ShuffleManager shuffleManager;

@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Maquina.unity
     guid: 5efaeb71c9afbb941aa873721fce6aeb
+  - enabled: 1
+    path: Assets/Scenes/JuanDScene.unity
+    guid: 38c2d6e66c0064f4c9a87bba0f549336
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
