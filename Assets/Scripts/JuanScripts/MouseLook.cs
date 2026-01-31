@@ -9,9 +9,12 @@ public class MouseLook : MonoBehaviour
     [Header("Clamp Vertical Rotation")]
     public float minY = -80f;
     public float maxY = 80f;
-
+    public float minX= -80f;
+    public float maxX= 80f;
     private float rotationY = 0f;
-
+ 
+    [Header("Offset")]
+    public float yOffset = 0f;
     void Update()
     {
         // Movimiento del mouse
@@ -26,7 +29,7 @@ public class MouseLook : MonoBehaviour
         rotationY = Mathf.Clamp(rotationY, minY, maxY);
 
         // Aplicar rotación vertical
-        transform.localEulerAngles = new Vector3(rotationY, transform.localEulerAngles.y, 0f);
+        transform.localEulerAngles = new Vector3(rotationY + yOffset, transform.localEulerAngles.y, 0f);
 
         // Debugs
         //Debug.Log($"MouseX: {mouseX}, MouseY: {mouseY}, RotationY: {rotationY}");

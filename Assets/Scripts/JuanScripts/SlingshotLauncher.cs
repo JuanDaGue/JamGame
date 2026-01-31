@@ -1,6 +1,6 @@
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
+[RequireComponent(typeof(LineRenderer))]
 public class SlingshotLauncher : MonoBehaviour
 {
     [Header("Refs")]
@@ -10,10 +10,20 @@ public class SlingshotLauncher : MonoBehaviour
     [Header("Tuning")]
     public float maxPower = 50f;       // Potencia máxima
     public float chargeTime = 3f;      // Tiempo máximo de carga en segundos
+    public int trajectoryPoints = 30;  // cantidad de puntos para dibujar la trayectoria
+    public float timeStep = 0.1f;      // intervalo de simulación
 
     private bool charging;
     private float currentCharge;
     private float chargeStartTime;
+
+    private LineRenderer lineRenderer;
+
+    void Awake()
+    {
+        lineRenderer = GetComponent<LineRenderer>();
+        lineRenderer.positionCount = 0;
+    }
 
     void Update()
     {
@@ -22,32 +32,31 @@ public class SlingshotLauncher : MonoBehaviour
             charging = true;
             chargeStartTime = Time.time;
             currentCharge = 0f;
-            //Debug.Log("Comenzó la carga de disparo.");
         }
 
         if (charging)
         {
             float elapsed = Time.time - chargeStartTime;
-            // Escalar la potencia según el tiempo transcurrido
             currentCharge = Mathf.Clamp((elapsed / chargeTime) * maxPower, 0f, maxPower);
 
-            //Debug.Log($"Cargando... Tiempo: {elapsed:F2}s, Potencia: {currentCharge:F2}");
+            // Dibujar trayectoria mientras se carga
+            Vector3 dir = (Camera.main.transform.forward + Camera.main.transform.up * 0.3f).normalized;
+            ShowTrajectory(firePoint.position, dir * currentCharge);
 
-            // Si llega al tiempo máximo, dispara automáticamente
             if (elapsed >= chargeTime)
             {
                 charging = false;
-                Vector3 dir = (Camera.main.transform.forward + Camera.main.transform.up * 0.3f).normalized;
                 Fire(dir, currentCharge);
-                //Debug.Log("Disparo automático por tiempo máximo.");
+                ClearTrajectory();
             }
         }
 
         if (Input.GetMouseButtonUp(0) && charging)
         {
             charging = false;
-            Fire(Camera.main.transform.forward, currentCharge);
-            //Debug.Log("Disparo al soltar el mouse.");
+            Vector3 dir = (Camera.main.transform.forward + Camera.main.transform.up * 0.3f).normalized;
+            Fire(dir, currentCharge);
+            ClearTrajectory();
         }
     }
 
@@ -59,12 +68,29 @@ public class SlingshotLauncher : MonoBehaviour
         Rigidbody rb = go.GetComponent<Rigidbody>();
         if (rb == null)
         {
-            //Debug.LogError("Projectile prefab necesita un Rigidbody.");
             Destroy(go);
             return;
         }
 
         rb.linearVelocity = dir.normalized * power;
-        //Debug.Log($"Disparo con potencia {power:F2}, dirección {dir}, velocidad aplicada {rb.linearVelocity}");
+    }
+
+    void ShowTrajectory(Vector3 startPos, Vector3 startVelocity)
+    {
+        lineRenderer.positionCount = trajectoryPoints;
+        Vector3 currentPos = startPos;
+        Vector3 currentVelocity = startVelocity;
+
+        for (int i = 0; i < trajectoryPoints; i++)
+        {
+            lineRenderer.SetPosition(i, currentPos);
+            currentVelocity += Physics.gravity * timeStep;
+            currentPos += currentVelocity * timeStep;
+        }
+    }
+
+    void ClearTrajectory()
+    {
+        lineRenderer.positionCount = 0;
     }
 }
