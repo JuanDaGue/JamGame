@@ -30,7 +30,7 @@ namespace GameJam.Core
 
         public override int GetHashCode()
         {
-            return id.GetHashCode();
+            return id?.GetHashCode() ?? 0;
         }
     }
 }

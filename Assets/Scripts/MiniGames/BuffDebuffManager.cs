@@ -5,13 +5,16 @@ using GameJam.Systems;
 namespace GameJam.MiniGames
 {
     /// <summary>
-    /// Este script puede estar en CUALQUIER escena (Exploración, Minijuego 1, Minijuego 2).
-    /// Verifica el estado al activarse y escucha cambios en tiempo real.
+    /// Este script gestiona la lógica "Mega Man":
+    /// Verifica si el jugador tiene máscaras ganadas en OTROS minijuegos para aplicar ventajas/desventajas.
     /// </summary>
     public class BuffDebuffManager : MonoBehaviour
     {
-        [Header("Configuración de Buffs/Debuffs")]
+        [Header("Requisitos (Progression System)")]
+        [Tooltip("Si tienes esta máscara (o item), obtienes el Buff de Fuego en ESTE nivel")]
         public CollectibleData requiredItemForFireBuff;
+        
+        [Tooltip("Si tienes esta máscara, sufres la Maldición en ESTE nivel")]
         public CollectibleData cursedItem;
 
         [Header("Estado Actual (Read Only)")]
@@ -23,15 +26,20 @@ namespace GameJam.MiniGames
             // 1. Suscribirse a la Biblia de Eventos
             GameEvents.OnCollectibleStateChanged += HandleInventoryChange;
 
-            // 2. Sincronizar estado inicial
-            // (Es posible que el item ya se tenga desde antes de cargar esta escena)
-            InitialStateCheck();
+
         }
 
         private void OnDisable()
         {
             // SIEMPRE desuscribirse para evitar memory leaks o errores al cambiar de escena
             GameEvents.OnCollectibleStateChanged -= HandleInventoryChange;
+        }
+
+        private void Start()
+        {
+             // 2. Sincronizar estado inicial
+            // Lo hacemos en Start para dar tiempo a que InventorySystem se inicialice si estamos en la misma escena
+            InitialStateCheck();
         }
 
         private void InitialStateCheck()
