@@ -4,15 +4,15 @@ using UnityEngine.SceneManagement;
 public class LobbySceneManager : MonoBehaviour
 {
     [Header("Raycast")]
-    public Camera cam;
-    public LayerMask clickableLayers = ~0; // default: everything
-    public float maxDistance = 200f;
+    [SerializeField] private Camera cam;
+    [SerializeField] private LayerMask clickableLayers = ~0; // default: everything
+    [SerializeField] private float maxDistance = 200f;
 
     [Header("Loading")]
-    public bool preventDoubleLoad = true;
+    [SerializeField] private bool preventDoubleLoad = true;
 
     [Tooltip("Optional: load additively if you want to overlay minigame later.")]
-    public bool loadAdditive = false;
+    [SerializeField] private bool loadAdditive = false;
 
     ScenePortal _hovered;
     bool _isLoading;
@@ -57,7 +57,7 @@ public class LobbySceneManager : MonoBehaviour
     {
         if (_isLoading && preventDoubleLoad) return;
         if (!_hovered) return;
-        if (!_hovered.clickable) return;
+        if (!_hovered.Clickable) return;
         if (!_hovered.HasValidTarget())
         {
             Debug.LogWarning($"[LobbySceneManager] Portal '{_hovered.name}' has no target scene assigned.");
@@ -73,14 +73,14 @@ public class LobbySceneManager : MonoBehaviour
 
         _isLoading = true;
 
-        if (portal.buildIndexOverride >= 0)
+        if (portal.BuildIndexOverride >= 0)
         {
-            if (loadAdditive) SceneManager.LoadScene(portal.buildIndexOverride, LoadSceneMode.Additive);
-            else SceneManager.LoadScene(portal.buildIndexOverride, LoadSceneMode.Single);
+            if (loadAdditive) SceneManager.LoadScene(portal.BuildIndexOverride, LoadSceneMode.Additive);
+            else SceneManager.LoadScene(portal.BuildIndexOverride, LoadSceneMode.Single);
             return;
         }
 
-        if (loadAdditive) SceneManager.LoadScene(portal.sceneName, LoadSceneMode.Additive);
-        else SceneManager.LoadScene(portal.sceneName, LoadSceneMode.Single);
+        if (loadAdditive) SceneManager.LoadScene(portal.SceneName, LoadSceneMode.Additive);
+        else SceneManager.LoadScene(portal.SceneName, LoadSceneMode.Single);
     }
 }

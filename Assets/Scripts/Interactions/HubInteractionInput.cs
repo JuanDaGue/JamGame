@@ -10,23 +10,20 @@ namespace GameJam.Interactions
     /// </summary>
     public class HubInteractionInput : MonoBehaviour
     {
-        [Header("Input")]
-        [Tooltip("Referencia a la acción de Interactuar/Click (InputActionReference)")]
-        public InputActionReference interactAction;
+        [Header("Configuración Input")]
+        [Tooltip("Referencia a la acción de Interactuar/Click")]
+        [SerializeField] private InputActionReference interactAction;
 
-        [Header("Raycast")]
-        [Tooltip("Cámara desde la cual se hace el raycast. Si es null, usa Camera.main.")]
-        public Camera mainCamera;
-
-        [Tooltip("Solo objetos en estas capas serán interactuables (recomendado: capa 'Stand').")]
-        public LayerMask interactionLayer = ~0;
+        [Header("Configuración Raycast")]
+        [SerializeField] private Camera mainCamera;
+        [SerializeField] private LayerMask interactionLayer = ~0;
 
         [Tooltip("Distancia máxima del raycast.")]
-        public float maxDistance = 100f;
+        [SerializeField] private float maxDistance = 100f;
 
         [Header("Fallback (sin puntero)")]
         [Tooltip("Si no hay Pointer.current (ej. gamepad), usa el centro de pantalla.")]
-        public bool useScreenCenterIfNoPointer = true;
+        [SerializeField] private bool useScreenCenterIfNoPointer = true;
 
         private void OnEnable()
         {

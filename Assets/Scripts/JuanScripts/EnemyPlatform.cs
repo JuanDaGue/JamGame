@@ -3,7 +3,7 @@ using UnityEngine;
 public class EnemyPlatform : MonoBehaviour
 {
     [Header("Refs")]
-    public TargetHitTrigger targetTrigger;
+    [SerializeField] private TargetHitTrigger targetTrigger;
 
     private void Awake()
     {

@@ -1,19 +1,19 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
     [SerializeField] private float jumpForce = 2.5f;
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private Transform cameraTransform;
 
-    [SerializeField]private Animator animator;
+    [SerializeField] private Animator animator;
     private Rigidbody rb;
     [SerializeField] private bool isGround = false;
     private Vector2 moveInput;
-    private float idleTimer = 0f;
 
-    [SerializeField] private string takeoffStateName = "Takeoff";
+    private float idleTimer = 0f;
 
     void Start()
     {
@@ -76,24 +76,24 @@ public class Player : MonoBehaviour
     }
 
     private void OnCollisionEnter(Collision collision)
-{
-    if (collision.gameObject.CompareTag("Ground"))
     {
-        isGround = true;
-        animator.SetBool("IsGrounded", isGround);
-        Debug.Log("Grounded: " + isGround);
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGround = true;
+            animator.SetBool("IsGrounded", isGround);
+            Debug.Log("Grounded: " + isGround);
+        }
     }
-}
 
-public void Jump(InputAction.CallbackContext callbackContext)
-{
-    if (callbackContext.performed && isGround)
+    public void Jump(InputAction.CallbackContext callbackContext)
     {
-        animator.SetTrigger("Jump");
-        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        isGround = false;
-        animator.SetBool("IsGrounded", isGround);
-        Debug.Log("Jump Triggered, Grounded: " + isGround);
+        if (callbackContext.performed && isGround)
+        {
+            animator.SetTrigger("Jump");
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGround = false;
+            animator.SetBool("IsGrounded", isGround);
+            Debug.Log("Jump Triggered, Grounded: " + isGround);
+        }
     }
-}
 }

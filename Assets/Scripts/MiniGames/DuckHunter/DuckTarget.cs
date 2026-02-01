@@ -2,11 +2,19 @@ using UnityEngine;
 
 namespace GameJam.MiniGames.DuckHunter
 {
+    // Los colores visuales de los objetivos (fijos)
+    public enum TargetColor
+    {
+        Green,
+        Red,
+        Blue
+    }
+
     public enum TargetType
     {
-        Real,       // El que suma puntos (Oculto)
-        Decoy,      // La trampa (El que la UI dice que dispares)
-        Neutral     // Relleno (Cuenta como error si disparas)
+        Real,       // Verde - El que REALMENTE debes disparar (suma puntos)
+        Decoy,      // Rojo - La TRAMPA (la UI mentirosa dice que dispares a este)
+        Neutral     // Azul - Neutral (no disparar, cuenta como error)
     }
 
     public enum MovementPattern
@@ -15,70 +23,77 @@ namespace GameJam.MiniGames.DuckHunter
         ZigZag
     }
 
+    [RequireComponent(typeof(Renderer))]
     public class DuckTarget : MonoBehaviour
     {
         [Header("Configuración")]
-        public TargetType type;
-        public MovementPattern movementPattern;
-        public float speed = 5f;
-        public float amplitude = 2f; // Para ZigZag
-        public float frequency = 2f; // Para ZigZag
+        [SerializeField] private TargetColor color; // El color visual (fijo)
+        [SerializeField] private MovementPattern movementPattern;
+        [SerializeField] private float speed = 5f;
+        [SerializeField] private float amplitude = 2f; // Para ZigZag
+        [SerializeField] private float frequency = 2f; // Para ZigZag
 
-        private Vector3 startPosition;
-        private float startTime;
+        private Vector3 moveDirection;
+        private float baseHeight; // Para ZigZag (altura central de oscilación)
         private DuckHunterManager manager;
+        private Renderer cachedRenderer; // Cache del Renderer
+        private bool initialized = false;
 
-        public void Initialize(TargetType targetType, MovementPattern pattern, float moveSpeed, DuckHunterManager gameManager)
+        public void Initialize(TargetColor targetColor, MovementPattern pattern, float moveSpeed, DuckHunterManager gameManager)
         {
-            type = targetType;
+            color = targetColor;
             movementPattern = pattern;
             speed = moveSpeed;
             manager = gameManager;
 
-            startPosition = transform.position;
-            startTime = Time.time;
-            
-            // Asignar color según tipo para debug/prototipo (hasta tener prefabs)
-            var renderer = GetComponent<Renderer>();
-            if (renderer != null)
+            // Determinar dirección inicial basada en posición (ir hacia el centro)
+            moveDirection = (transform.position.x > 0) ? Vector3.left : Vector3.right;
+
+            baseHeight = transform.position.y;
+            initialized = true;
+
+            Debug.Log($"[DuckTarget] Initialized. Pattern: {movementPattern}, Speed: {speed}, Direction: {moveDirection}");
+
+            // Asignar color visual (cacheamos el renderer en primera llamada)
+            if (cachedRenderer == null)
+                cachedRenderer = GetComponent<Renderer>();
+
+            if (cachedRenderer != null)
             {
-                switch (type)
+                cachedRenderer.material.color = targetColor switch
                 {
-                    case TargetType.Real: renderer.material.color = Color.green; break; // Real (Jugador no sabe)
-                    case TargetType.Decoy: renderer.material.color = Color.red; break;  // Trampa (UI dice este)
-                    case TargetType.Neutral: renderer.material.color = Color.gray; break;
-                }
+                    TargetColor.Green => Color.green,
+                    TargetColor.Red => Color.red,
+                    TargetColor.Blue => Color.blue,
+                    _ => Color.white
+                };
             }
         }
 
         private void Update()
         {
-            float distance = speed * (Time.time - startTime);
-            Vector3 currentPos = startPosition;
+            if (!initialized) return;
 
-            // Movimiento básico de Izquierda a Derecha (asumiendo X+)
-            // Si startPosition.x es positivo, asumimos que va a la izquierda (X-)
-            float direction = (startPosition.x > 0) ? -1f : 1f;
+            // 1. Movimiento Horizontal (Incremental)
+            transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
 
-            float xOffset = distance * direction;
-
-            if (movementPattern == MovementPattern.Linear)
+            // 2. Rebote en bordes (Horizontal)
+            if (transform.position.x > 15f && moveDirection.x > 0)
             {
-                currentPos.x += xOffset;
+                moveDirection = Vector3.left;
             }
-            else if (movementPattern == MovementPattern.ZigZag)
+            else if (transform.position.x < -15f && moveDirection.x < 0)
             {
-                currentPos.x += xOffset;
-                currentPos.y += Mathf.Sin(Time.time * frequency) * amplitude;
+                moveDirection = Vector3.right;
             }
 
-            transform.position = currentPos;
-
-            // Destruir si sale de pantalla (valores aproximados, ajustar según cámara)
-            if (Mathf.Abs(transform.position.x) > 15f)
+            // 3. Patrón ZigZag (Oscilación en Y)
+            if (movementPattern == MovementPattern.ZigZag)
             {
-                Destroy(gameObject);
-                // Opcional: Notificar al manager que se escapó un objetivo
+                float yOffset = Mathf.Sin(Time.time * frequency) * amplitude;
+                Vector3 pos = transform.position;
+                pos.y = baseHeight + yOffset;
+                transform.position = pos;
             }
         }
 
@@ -86,7 +101,7 @@ namespace GameJam.MiniGames.DuckHunter
         {
             if (manager != null)
             {
-                manager.RegisterHit(type);
+                manager.RegisterHit(color);
             }
             Destroy(gameObject);
         }
