@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prizes:
   - prefab: {fileID: 1433692322714932167, guid: daf15040006f4c7439dfd095e8507b1c, type: 3}
-    probability: 0.3125265
+    probability: 0.30094177
   - prefab: {fileID: 4133079051345182620, guid: 2dd8763538b93e14d8c301c55bcc08c2, type: 3}
-    probability: 0.68747354
+    probability: 0.69905823
   normalizeProbabilities: 1
