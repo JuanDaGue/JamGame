@@ -5,26 +5,27 @@ public class NPCAgent : MonoBehaviour
     public enum PathMode { Loop, PingPong }
 
     [Header("Route")]
-    public Route route;
-    public PathMode pathMode = PathMode.Loop;
-    public int startIndex = 0;
-    public float arriveDistance = 0.2f;
+    [SerializeField] private Route route;
+    public Route Route { get => route; set => route = value; }
+    [SerializeField] private PathMode pathMode = PathMode.Loop;
+    [SerializeField] private int startIndex = 0;
+    [SerializeField] private float arriveDistance = 0.2f;
 
     [Header("Movement (Transform)")]
-    public float moveSpeed = 1.6f;     // units/sec
-    public float turnSpeed = 360f;     // degrees/sec
+    [SerializeField] private float moveSpeed = 1.6f;     // units/sec
+    [SerializeField] private float turnSpeed = 360f;     // degrees/sec
 
     [Header("Stops (each waypoint)")]
-    public Vector2 waitSecondsRange = new Vector2(0.2f, 1.2f);
+    [SerializeField] private Vector2 waitSecondsRange = new Vector2(0.2f, 1.2f);
 
     [Header("PingPong End Pause (only at ends)")]
     [Tooltip("Extra random pause before turning around at the ends (PingPong only).")]
-    public Vector2 endWaitSecondsRange = new Vector2(0.5f, 2.0f);
+    [SerializeField] private Vector2 endWaitSecondsRange = new Vector2(0.5f, 2.0f);
 
     [Header("Start Placement")]
-    public bool snapToStartWaypoint = true;
-    public bool keepCurrentYOnSnap = true;
-    public bool faceNextOnStart = true;
+    [SerializeField] private bool snapToStartWaypoint = true;
+    [SerializeField] private bool keepCurrentYOnSnap = true;
+    [SerializeField] private bool faceNextOnStart = true;
 
     int _index;
     int _dir = 1;

@@ -1,19 +1,19 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class NPCManager : MonoBehaviour
 {
     [Header("NPCs to manage")]
-    public List<NPCAgent> npcs = new List<NPCAgent>();
+    [SerializeField] private List<NPCAgent> npcs = new List<NPCAgent>();
 
     [Header("Available routes")]
-    public List<Route> routes = new List<Route>();
+    [SerializeField] private List<Route> routes = new List<Route>();
 
     public enum AssignMode { ByIndex, RoundRobin, Random }
-    public AssignMode assignMode = AssignMode.RoundRobin;
+    [SerializeField] private AssignMode assignMode = AssignMode.RoundRobin;
 
     [Tooltip("If true, assigns routes on Start.")]
-    public bool assignOnStart = true;
+    [SerializeField] private bool assignOnStart = true;
 
     void Start()
     {
@@ -58,7 +58,7 @@ public class NPCManager : MonoBehaviour
                     break;
             }
 
-            npcs[i].route = chosen;
+            npcs[i].Route = chosen;
         }
     }
 
@@ -68,7 +68,7 @@ public class NPCManager : MonoBehaviour
         npcs.Clear();
         routes.Clear();
 
-        npcs.AddRange(FindObjectsOfType<NPCAgent>(true));
-        routes.AddRange(FindObjectsOfType<Route>(true));
+        npcs.AddRange(FindObjectsByType<NPCAgent>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+        routes.AddRange(FindObjectsByType<Route>(FindObjectsInactive.Include, FindObjectsSortMode.None));
     }
 }

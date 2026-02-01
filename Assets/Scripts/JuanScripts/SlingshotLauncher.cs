@@ -4,14 +4,14 @@ using UnityEngine;
 public class SlingshotLauncher : MonoBehaviour
 {
     [Header("Refs")]
-    public Transform firePoint;
-    public GameObject projectilePrefab;
+    [SerializeField] private Transform firePoint;
+    [SerializeField] private GameObject projectilePrefab;
 
     [Header("Tuning")]
-    public float maxPower = 50f;       // Potencia máxima
-    public float chargeTime = 3f;      // Tiempo máximo de carga en segundos
-    public int trajectoryPoints = 30;  // cantidad de puntos para dibujar la trayectoria
-    public float timeStep = 0.1f;      // intervalo de simulación
+    [SerializeField] private float maxPower = 50f;       // Potencia máxima
+    [SerializeField] private float chargeTime = 3f;      // Tiempo máximo de carga en segundos
+    [SerializeField] private int trajectoryPoints = 30;  // cantidad de puntos para dibujar la trayectoria
+    [SerializeField] private float timeStep = 0.1f;      // intervalo de simulación
 
     private bool charging;
     private float currentCharge;

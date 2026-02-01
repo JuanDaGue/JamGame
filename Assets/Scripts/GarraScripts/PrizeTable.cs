@@ -16,7 +16,7 @@ public class PrizeTable : ScriptableObject
 
     [Header("Prizes")]
     [Tooltip("Usually 2 prizes: one 'good' and one 'bad'")]
-    public PrizeEntry[] prizes;
+    [SerializeField] private PrizeEntry[] prizes;
 
     [Header("Debug")]
     [SerializeField] bool normalizeProbabilities = true;

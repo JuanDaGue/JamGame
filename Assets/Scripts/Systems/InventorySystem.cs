@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using UnityEngine;
 using GameJam.Core;
+using UnityEngine;
 
 namespace GameJam.Systems
 {
@@ -53,30 +53,30 @@ namespace GameJam.Systems
 
         public void AddItem(CollectibleData item)
         {
-            if (item == null || string.IsNullOrEmpty(item.id)) return;
+            if (item == null || string.IsNullOrEmpty(item.Id)) return;
 
-            if (!collectedItemIds.Contains(item.id))
+            if (!collectedItemIds.Contains(item.Id))
             {
                 // Actualizar estado interno
-                collectedItemIds.Add(item.id);
-                collectedItems[item.id] = item;
-                
-                Debug.Log($"[InventorySystem] Item Agregado: {item.id} - Notificando a GameEvents");
+                collectedItemIds.Add(item.Id);
+                collectedItems[item.Id] = item;
+
+                Debug.Log($"[InventorySystem] Item Agregado: {item.Id} - Notificando a GameEvents");
 
                 // INVOCAR BIBLIA DE EVENTOS
                 GameEvents.OnCollectibleStateChanged?.Invoke(item, true);
-                GameEvents.OnCollectibleCollectedById?.Invoke(item.id);
+                GameEvents.OnCollectibleCollectedById?.Invoke(item.Id);
             }
         }
 
         public void RemoveItem(CollectibleData item)
         {
-            if (item != null && collectedItemIds.Contains(item.id))
+            if (item != null && collectedItemIds.Contains(item.Id))
             {
-                collectedItemIds.Remove(item.id);
-                collectedItems.Remove(item.id);
+                collectedItemIds.Remove(item.Id);
+                collectedItems.Remove(item.Id);
 
-                Debug.Log($"[InventorySystem] Item Removido: {item.id} - Notificando a GameEvents");
+                Debug.Log($"[InventorySystem] Item RemovIdo: {item.Id} - Notificando a GameEvents");
 
                 // INVOCAR BIBLIA DE EVENTOS
                 GameEvents.OnCollectibleStateChanged?.Invoke(item, false);
@@ -90,7 +90,7 @@ namespace GameJam.Systems
         public bool HasItem(CollectibleData item)
         {
             if (item == null) return false;
-            return collectedItemIds.Contains(item.id);
+            return collectedItemIds.Contains(item.Id);
         }
 
         public bool HasItemById(string itemId)
