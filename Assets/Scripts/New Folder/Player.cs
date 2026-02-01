@@ -5,30 +5,20 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private float jumpForce = 2.5f;
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private Transform cameraTransform; 
+    [SerializeField] private Transform cameraTransform;
 
-    //private Animator animator;
+    [SerializeField]private Animator animator;
     private Rigidbody rb;
-    private bool isGround;
+    [SerializeField] private bool isGround = false;
     private Vector2 moveInput;
+    private float idleTimer = 0f;
+
     [SerializeField] private string takeoffStateName = "Takeoff";
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        //animator = GetComponent<Animator>();
-    }
-
-    public void Jump(InputAction.CallbackContext callbackContext)
-    {
-        if (callbackContext.performed && isGround)
-        {
-            // animator.SetBool("isJump", true);
-            // animator.CrossFadeInFixedTime(takeoffStateName, 0f);
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            isGround = false;
-
-        }
+        animator = GetComponent<Animator>();
     }
 
     public void Move(InputAction.CallbackContext context)
@@ -48,26 +38,62 @@ public class Player : MonoBehaviour
         right.Normalize();
 
         Vector3 direction = forward * moveInput.y + right * moveInput.x;
-
         Vector3 moveVelocity = direction * moveSpeed;
         rb.linearVelocity = new Vector3(moveVelocity.x, rb.linearVelocity.y, moveVelocity.z);
-
 
         if (direction != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.15f);
         }
+
         float speed = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z).magnitude;
-        //animator.SetFloat("speed", speed);
+        animator.SetBool("IsWalking", speed > 0.1f);
+    }
+
+    void Update()
+    {
+        // Contador de inactividad para bailar
+        if (moveInput == Vector2.zero && isGround)
+        {
+            idleTimer += Time.deltaTime;
+            if (idleTimer >= 15f)
+            {
+                animator.SetBool("IsDancing", true);
+            }
+        }
+        else
+        {
+            idleTimer = 0f;
+            animator.SetBool("IsDancing", false);
+        }
+
+        // Tecla R para bailar manualmente
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            animator.SetBool("IsDancing", true);
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
+{
+    if (collision.gameObject.CompareTag("Ground"))
     {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGround = true;
-            //animator.SetBool("isJump", false);
-        }
+        isGround = true;
+        animator.SetBool("IsGrounded", isGround);
+        Debug.Log("Grounded: " + isGround);
     }
+}
+
+public void Jump(InputAction.CallbackContext callbackContext)
+{
+    if (callbackContext.performed && isGround)
+    {
+        animator.SetTrigger("Jump");
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        isGround = false;
+        animator.SetBool("IsGrounded", isGround);
+        Debug.Log("Jump Triggered, Grounded: " + isGround);
+    }
+}
 }
