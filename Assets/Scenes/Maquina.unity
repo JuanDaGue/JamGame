@@ -199,7 +199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78e3ad3b33055b14dbd8e58e2b8e25d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rewardMask: {fileID: 0}
+  rewardMask: {fileID: 11400000, guid: 0afc1de3d1608434bb29161812a25eb3, type: 2}
   hubSceneFile: {fileID: 102900000, guid: 56e9b13d0fac42649be57e9236c9e1e1, type: 3}
   hubSceneName: Main
 --- !u!4 &877238206

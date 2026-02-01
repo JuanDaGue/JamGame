@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using GameJam.MiniGames;
 using UnityEngine;
 
 public class EnemyStateController : MonoBehaviour
@@ -12,15 +14,38 @@ public class EnemyStateController : MonoBehaviour
     [Header("State")]
     [SerializeField] private EnemyState state = EnemyState.Waiting;
     public EnemyState State => state;
+    public MinigameController minigameController; // referencia al minijuego asociado
     public bool isInWater { get; private set; }
 
     [Header("Attack Timing")]
     [SerializeField] private float timeToAttack = 15f; // segundos para pasar de Angry a Attack
     private float angryStartTime;
+    public TargetHitTrigger targetTrigger;
 
     void Start()
     {
         EnterWaiting();
+        if(minigameController == null)
+        {
+            minigameController = FindFirstObjectByType<MinigameController>();
+        }
+        if(animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
+        animator.SetBool("IsInIdle", true);
+        animator.SetBool("IsWalking", false);
+        targetTrigger.OnHit += FallingTriggeredAnimtion;
+    }
+
+    private void FallingTriggeredAnimtion()
+    {
+        animator.SetTrigger("Falling");
+        targetTrigger.OnHit -= FallingTriggeredAnimtion;
+    }
+    void OnDisable()
+    {
+        targetTrigger.OnHit -= FallingTriggeredAnimtion;
     }
 
     public void SetInWaterByTrigger(bool inWater)
@@ -43,7 +68,7 @@ public class EnemyStateController : MonoBehaviour
         state = EnemyState.Waiting;
         if (animator != null)
         {
-            animator.Play("Idle");
+            animator.SetBool("IsInIdle", true);
         }
     }
 
@@ -55,7 +80,7 @@ public class EnemyStateController : MonoBehaviour
 
         if (animator != null)
         {
-            animator.Play("Angry");
+            animator.SetTrigger("Angry");
         }
     }
 
@@ -74,10 +99,12 @@ public class EnemyStateController : MonoBehaviour
     void EnterDead()
     {
         state = EnemyState.Dead;
-        if (animator != null)
-        {
-            animator.Play("Death");
-        }
+        // if (animator != null)
+        // {
+        //     animator.Play("Death");
+        // }
+        StartCoroutine(WaitAndDie(3f,true)); // esperar 2 segundos antes de llamar a WinGame
+        Debug.Log("Enemy murió electrocutado.");
     }
 
     void EnterAttack()
@@ -88,11 +115,24 @@ public class EnemyStateController : MonoBehaviour
         state = EnemyState.Attack;
         if (animator != null)
         {
-            animator.Play("Attack");
+            animator.SetTrigger("Attack");
         }
 
         OnAttack?.Invoke(); // Invocar el evento de ataque
-        GameManager.Instance?.GameOver();
+        //GameManager.Instance?.GameOver();
+        StartCoroutine(WaitAndDie(3f,false)); // esperar 3 segundos antes de llamar a LoseGame
         Debug.Log("Enemy cambió de Angry a Attack después de 15s.");
+    }
+    IEnumerator WaitAndDie(float delay, bool won = false)
+    {
+        yield return new WaitForSeconds(delay);
+        if (won)
+        {
+            minigameController?.WinGame();
+        }
+        else
+        {
+            minigameController?.LoseGame();
+        }
     }
 }
