@@ -9,10 +9,11 @@ namespace GameJam.MiniGames.DuckHunter
         [SerializeField] private DuckSpawner spawner;
         [SerializeField] private DuckHunterUI ui;
         [SerializeField] private MinigameController controller;
+        [SerializeField] private DuckHunterVFX vfxController;
 
         [Header("Configuración de Oleadas")]
         [SerializeField] private int totalWaves = 3;
-        [SerializeField] private int targetsPerWave = 10;
+        [SerializeField] private int targetsPerColor = 5; // Cantidad de CADA tipo (Real, Decoy, Neutral)
         [SerializeField] private float spawnRate = 1.5f;
 
         // Estado del Juego
@@ -59,16 +60,23 @@ namespace GameJam.MiniGames.DuckHunter
             // 2. Configurar UI para engañar al jugador
             // La UI muestra el color Decoy (que NO debe disparar)
             ui.SetInstruction(currentDecoyColor);
+            ui.UpdateWave(currentWave, totalWaves);
 
-            // 3. Calcular umbral de derrota
-            wrongHitsThreshold = (targetsPerWave / 2) + 1;
+            // 3. Calcular umbrales 
+            // - Derrota: Si matas a la MAYORÍA de los Decoys/Neutrals.
+            //   Como spawnearán 'targetsPerColor' de cada uno, usaremos ese valor base.
+            wrongHitsThreshold = (targetsPerColor / 2) + 1;
+
             wrongTargetsEliminated = 0;
             realTargetsEliminated = 0;
 
-            // 4. Iniciar Spawner con los colores asignados
-            spawner.SpawnWave(targetsPerWave, currentRealColor, currentDecoyColor, currentNeutralColor, spawnRate);
+            // 4. Iniciar Spawner con los colores asignados Y cantidades explícitas
+            // User requested: "cantidad de enemigos de cada color sea el mismo numero de la condicion de victoria"
+            // Pasamos targetsPerColor para CADA uno de los 3 tipos.
+            spawner.SpawnWave(targetsPerColor, targetsPerColor, targetsPerColor,
+                              currentRealColor, currentDecoyColor, currentNeutralColor, spawnRate);
 
-            Debug.Log($"[DuckHunter] Oleada {currentWave}: UI dice {currentDecoyColor}, Real es {currentRealColor}, Neutral es {currentNeutralColor}");
+            Debug.Log($"[DuckHunter] Oleada {currentWave}: Roles asignados. Real={currentRealColor}, Decoy={currentDecoyColor}, Neutral={currentNeutralColor}. Spawning {targetsPerColor} of each.");
         }
 
         private void SetupWaveRules()
@@ -102,22 +110,33 @@ namespace GameJam.MiniGames.DuckHunter
             currentNeutralColor = remainingColors[1 - decoyIndex]; // El otro
         }
 
-        public void RegisterHit(TargetColor hitColor)
+        public void RegisterHit(TargetColor hitColor, Vector3 hitPosition)
         {
             if (!isGameActive) return;
+
+            // Determinar tipo para VFX
+            TargetType typeHit = TargetType.Neutral;
+            if (hitColor == currentRealColor) typeHit = TargetType.Real;
+            else if (hitColor == currentDecoyColor) typeHit = TargetType.Decoy;
+
+            if (vfxController != null)
+            {
+                vfxController.PlayHitVFX(hitPosition, typeHit);
+            }
 
             if (hitColor == currentRealColor)
             {
                 realTargetsEliminated++;
                 ui.UpdateScore(realTargetsEliminated);
 
-                // Condición de victoria de oleada (ejemplo: 50% de los targets spawnearon?)
-                // Ojo: targetsPerWave es cuantos spawnean. Si elimina todos los reals...
-                // Por ahora no hay condición explícita de "Fin de oleada" salvo que se acabe el tiempo o spawns.
-                // El spawner termina su corrutina, pero el manager no sabe cuándo termina la oleada.
-                // Podríamos asumir que si se matan suficientes, se pasa?
-                // Dejaremos esto simple por ahora, la oleada "termina" por tiempo o flujo externo, 
-                // pero DuckSpawner lanza "Oleada completada". Falta conectar eso.
+                // Condición de victoria de oleada
+                if (realTargetsEliminated >= targetsPerColor)
+                {
+                    Debug.Log($"[DuckHunter] Wave {currentWave} Complete! Spawning next wave...");
+
+                    // Esperar un momento antes de la siguiente oleada para dar feedback
+                    StartCoroutine(WaitAndNextWave());
+                }
             }
             else
             {
@@ -130,6 +149,13 @@ namespace GameJam.MiniGames.DuckHunter
                     GameOver();
                 }
             }
+        }
+
+        private System.Collections.IEnumerator WaitAndNextWave()
+        {
+            // Pausa breve para celebrar
+            yield return new WaitForSeconds(1.5f);
+            StartNextWave();
         }
 
         public void GameOver()

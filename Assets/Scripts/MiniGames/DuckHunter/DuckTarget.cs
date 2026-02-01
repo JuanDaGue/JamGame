@@ -36,8 +36,8 @@ namespace GameJam.MiniGames.DuckHunter
         private Vector3 moveDirection;
         private float baseHeight; // Para ZigZag (altura central de oscilación)
         private DuckHunterManager manager;
-        private Renderer cachedRenderer; // Cache del Renderer
         private bool initialized = false;
+        private readonly WaitForSeconds flashDuration = new(0.05f);
 
         public void Initialize(TargetColor targetColor, MovementPattern pattern, float moveSpeed, DuckHunterManager gameManager)
         {
@@ -53,21 +53,6 @@ namespace GameJam.MiniGames.DuckHunter
             initialized = true;
 
             Debug.Log($"[DuckTarget] Initialized. Pattern: {movementPattern}, Speed: {speed}, Direction: {moveDirection}");
-
-            // Asignar color visual (cacheamos el renderer en primera llamada)
-            if (cachedRenderer == null)
-                cachedRenderer = GetComponent<Renderer>();
-
-            if (cachedRenderer != null)
-            {
-                cachedRenderer.material.color = targetColor switch
-                {
-                    TargetColor.Green => Color.green,
-                    TargetColor.Red => Color.red,
-                    TargetColor.Blue => Color.blue,
-                    _ => Color.white
-                };
-            }
         }
 
         private void Update()
@@ -75,7 +60,7 @@ namespace GameJam.MiniGames.DuckHunter
             if (!initialized) return;
 
             // 1. Movimiento Horizontal (Incremental)
-            transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
+            transform.Translate(speed * Time.deltaTime * moveDirection, Space.World);
 
             // 2. Rebote en bordes (Horizontal)
             if (transform.position.x > 15f && moveDirection.x > 0)
@@ -99,10 +84,31 @@ namespace GameJam.MiniGames.DuckHunter
 
         public void OnHit()
         {
+            StartCoroutine(DieSequence());
+        }
+
+        private System.Collections.IEnumerator DieSequence()
+        {
+            // 1. Notificar al Manager (para Score y VFX)
             if (manager != null)
             {
-                manager.RegisterHit(color);
+                manager.RegisterHit(color, transform.position);
             }
+
+            // 2. Flash visual (Blanco)
+            if (TryGetComponent(out Renderer r))
+            {
+                // Opción A: Cambiar color a blanco puro
+                // Opción B: Si tienes un shader con "Emission", subirla a tope.
+                // Usaremos Color blanco para standard shader.
+                r.material.color = Color.white;
+                r.material.EnableKeyword("_EMISSION");
+                r.material.SetColor("_EmissionColor", Color.white * 2f); // HDR Intensity
+            }
+
+            // 3. Esperar un frame o brevísimo tiempo par que se vea el flash
+            yield return flashDuration;
+
             Destroy(gameObject);
         }
     }

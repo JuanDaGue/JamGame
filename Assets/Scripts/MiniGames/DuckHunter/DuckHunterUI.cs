@@ -10,6 +10,7 @@ namespace GameJam.MiniGames.DuckHunter
     {
         [Header("UI Elements")]
         [SerializeField] private TextMeshProUGUI instructionText;
+        [SerializeField] private TextMeshProUGUI waveText;
         [SerializeField] private Image targetIconDisplay; // Para mostrar qué buscar (con el engaño)
 
         [Header("Iconos (Placeholders)")]
@@ -66,6 +67,14 @@ namespace GameJam.MiniGames.DuckHunter
         public void UpdateScore(int score)
         {
             // Feedback opcional (podrías añadir un texto de puntuación aquí)
+        }
+
+        public void UpdateWave(int current, int total)
+        {
+            if (waveText != null)
+            {
+                waveText.text = $"Oleada {current}/{total}";
+            }
         }
 
         /// <summary>

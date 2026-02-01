@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7732740100159237231}
   - component: {fileID: 460989491686587100}
   m_Layer: 6
-  m_Name: Duck_Target_Base
+  m_Name: Duck_Green
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66,7 +66,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 3af3f490ded29194eb1aa1681cdde2ab, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
