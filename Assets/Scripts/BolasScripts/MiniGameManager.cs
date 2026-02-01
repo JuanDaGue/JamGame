@@ -342,6 +342,7 @@ public class MiniGameManager : MonoBehaviour
 
         if (playerWon)
         {
+            minigameController.WinGame(); // Nuevo sistema preferido
             Debug.Log("[MiniGameManager] WIN");
             _roundActive = false;
             _isResolving = false;
