@@ -4,7 +4,7 @@ public class ElectrocutionZone : MonoBehaviour
 {
     private bool lampInZone = false;
 
-    public ElectricLamp lamp; // asigna en inspector
+    [SerializeField] private ElectricLamp lamp; // asigna en inspector
     private EnemyStateController enemy; // referencia al enemigo dentro de la zona
 
     private void OnTriggerEnter(Collider other)

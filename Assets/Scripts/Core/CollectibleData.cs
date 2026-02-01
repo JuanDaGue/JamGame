@@ -6,17 +6,21 @@ namespace GameJam.Core
     public class CollectibleData : ScriptableObject
     {
         [Tooltip("Identificador único para el coleccionable (ej: 'LLAVE_ROJA', 'AMULETO_FUEGO')")]
-        public string id;
+        [SerializeField] private string id;
+        public string Id => id;
 
         [Tooltip("Nombre visible para el jugador")]
-        public string displayName;
+        [SerializeField] private string displayName;
+        public string DisplayName => displayName;
 
         [Tooltip("Icono para mostrar en UI")]
-        public Sprite icon;
+        [SerializeField] private Sprite icon;
+        public Sprite Icon => icon;
 
         [Tooltip("Descripción opcional")]
         [TextArea]
-        public string description;
+        [SerializeField] private string description;
+        public string Description => description;
 
         // Sobrescribimos Equals para facilitar comparaciones
         public override bool Equals(object other)

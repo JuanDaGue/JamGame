@@ -11,11 +11,11 @@ namespace GameJam.Interactions
     {
         [Header("Configuración Input")]
         [Tooltip("Referencia a la acción de Interactuar/Click")]
-        public InputActionReference interactAction;
+        [SerializeField] private InputActionReference interactAction;
 
         [Header("Configuración Raycast")]
-        public Camera mainCamera;
-        public LayerMask interactionLayer;
+        [SerializeField] private Camera mainCamera;
+        [SerializeField] private LayerMask interactionLayer;
 
         private void OnEnable()
         {

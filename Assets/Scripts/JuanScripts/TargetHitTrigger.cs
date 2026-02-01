@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class TargetHitTrigger : MonoBehaviour
 {
-    public event  System.Action  OnHit;
-    public bool singleUse = true;
+    public event System.Action OnHit;
+    [SerializeField] private bool singleUse = true;
 
     private bool used;
 

@@ -1,6 +1,6 @@
-using UnityEngine;
 using GameJam.Core;
 using GameJam.Systems;
+using UnityEngine;
 
 namespace GameJam.MiniGames
 {
@@ -12,14 +12,17 @@ namespace GameJam.MiniGames
     {
         [Header("Requisitos (Progression System)")]
         [Tooltip("Si tienes esta máscara (o item), obtienes el Buff de Fuego en ESTE nivel")]
-        public CollectibleData requiredItemForFireBuff;
-        
+        [SerializeField] private CollectibleData requiredItemForFireBuff;
+
         [Tooltip("Si tienes esta máscara, sufres la Maldición en ESTE nivel")]
-        public CollectibleData cursedItem;
+        [SerializeField] private CollectibleData cursedItem;
 
         [Header("Estado Actual (Read Only)")]
-        public bool hasFireBuff = false;
-        public bool hasCurseDebuff = false;
+        [SerializeField] private bool hasFireBuff = false;
+        [SerializeField] private bool hasCurseDebuff = false;
+
+        public bool HasFireBuff => hasFireBuff;
+        public bool HasCurseDebuff => hasCurseDebuff;
 
         private void OnEnable()
         {
@@ -37,7 +40,7 @@ namespace GameJam.MiniGames
 
         private void Start()
         {
-             // 2. Sincronizar estado inicial
+            // 2. Sincronizar estado inicial
             // Lo hacemos en Start para dar tiempo a que InventorySystem se inicialice si estamos en la misma escena
             InitialStateCheck();
         }
@@ -52,7 +55,7 @@ namespace GameJam.MiniGames
 
                 if (cursedItem != null)
                     hasCurseDebuff = InventorySystem.Instance.HasItem(cursedItem);
-                
+
                 ApplyEffects();
             }
         }
@@ -84,10 +87,10 @@ namespace GameJam.MiniGames
         {
             // Aquí iría la lógica específica del minijuego
             // Ej: PlayerStats.DamageMultiplier = hasFireBuff ? 2.0f : 1.0f;
-            
-            if (hasFireBuff) 
+
+            if (hasFireBuff)
                 Debug.Log($"[{gameObject.name}] Fire Buff ACTIVO");
-            else 
+            else
                 Debug.Log($"[{gameObject.name}] Fire Buff INACTIVO");
 
             if (hasCurseDebuff)

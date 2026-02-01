@@ -8,42 +8,45 @@ using UnityEngine.UI;
 public class MiniGameManager : MonoBehaviour
 {
     [Header("References")]
-    public ShuffleManager shuffleManager;
-    public List<Cup> cups = new List<Cup>();
+    [SerializeField] private ShuffleManager shuffleManager;
+    [SerializeField] private List<Cup> cups = new();
 
     [Header("Round Parameters")]
     [Tooltip("Tiempo que las bolas permanecen visibles al inicio.")]
-    public float initialRevealTime = 1.2f;
+    [SerializeField] private float initialRevealTime = 1.2f;
 
     [Tooltip("Duración del levantar / bajar vasos.")]
-    public float liftDuration = 0.35f;
+    [SerializeField] private float liftDuration = 0.35f;
 
     [Tooltip("Duración del pop visual al revelar bolas.")]
-    public float revealVisualDuration = 0.18f;
+    [SerializeField] private float revealVisualDuration = 0.18f;
 
     [Range(1, 2)]
     [Tooltip("Cantidad de bolas activas.")]
-    public int ballsToPlace = 2;
+    [SerializeField] private int ballsToPlace = 2;
 
     [Header("UI (Optional)")]
-    public Text instructionText;
-    public Button startButton;
-    public Slider speedSlider;
+    [SerializeField] private Text instructionText;
+    [SerializeField] private Button startButton;
+    [SerializeField] private Slider speedSlider;
 
     [Header("Audio (Optional)")]
-    public AudioSource audioSource;
-    public AudioClip winClip;
-    public AudioClip loseClip;
-    public AudioClip revealAllClip;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip winClip;
+    [SerializeField] private AudioClip loseClip;
+    [SerializeField] private AudioClip revealAllClip;
 
     [Header("Events")]
-    public UnityEvent OnRoundStarted;
-    public UnityEvent OnRoundFinishedWin;
-    public UnityEvent OnRoundFinishedLose;
+    [SerializeField] private UnityEvent onRoundStarted;
+    public UnityEvent OnRoundStarted => onRoundStarted;
+    [SerializeField] private UnityEvent onRoundFinishedWin;
+    public UnityEvent OnRoundFinishedWin => onRoundFinishedWin;
+    [SerializeField] private UnityEvent onRoundFinishedLose;
+    public UnityEvent OnRoundFinishedLose => onRoundFinishedLose;
 
     [Header("Debug / Flow")]
     [Tooltip("Si true la ronda arrancará automáticamente al Start (útil para testing).")]
-    public bool autoStart = true;
+    [SerializeField] private bool autoStart = true;
 
     // ======================================================
     // STATE
@@ -51,6 +54,8 @@ public class MiniGameManager : MonoBehaviour
 
     private bool _roundActive;
     private bool _canSelect;
+    private WaitForSeconds _waitSmall = new(0.05f);
+    private WaitForSeconds _waitOneSecond = new(1f);
 
     // ======================================================
     // UNITY
@@ -79,7 +84,7 @@ public class MiniGameManager : MonoBehaviour
 
             cup.SetHasBall(false);
             cup.ResetLift();
-            cup.selectable = false;
+            cup.Selectable = false;
         }
 
         if (shuffleManager != null)
@@ -100,7 +105,7 @@ public class MiniGameManager : MonoBehaviour
 
         if (speedSlider != null && shuffleManager != null)
             speedSlider.onValueChanged.AddListener(
-                v => shuffleManager.speedMultiplier = Mathf.Max(0.05f, v)
+                v => shuffleManager.SpeedMultiplier = Mathf.Max(0.05f, v)
             );
 
         UpdateInstruction("Pulsa iniciar para jugar");
@@ -154,7 +159,7 @@ public class MiniGameManager : MonoBehaviour
         foreach (var cup in cups)
         {
             cup.ResetLift();
-            cup.selectable = false;
+            cup.Selectable = false;
         }
 
         AssignBallsRandomly();
@@ -202,7 +207,7 @@ public class MiniGameManager : MonoBehaviour
     {
         if (cups == null || cups.Count == 0) return;
 
-        List<int> indices = new List<int>();
+        List<int> indices = new();
         for (int i = 0; i < cups.Count; i++)
             indices.Add(i);
 
@@ -229,7 +234,7 @@ public class MiniGameManager : MonoBehaviour
     private void ShowAllBalls()
     {
         foreach (var cup in cups)
-            if (cup.hasBall)
+            if (cup.HasBall)
                 cup.SetBallVisible(true);
     }
 
@@ -249,7 +254,7 @@ public class MiniGameManager : MonoBehaviour
         _canSelect = true;
 
         foreach (var cup in cups)
-            cup.selectable = true;
+            cup.Selectable = true;
 
         UpdateInstruction("Encuentra el vaso vacío");
     }
@@ -263,12 +268,12 @@ public class MiniGameManager : MonoBehaviour
 
         // Bloquear todos inmediatamente
         foreach (var c in cups)
-            c.selectable = false;
+            c.Selectable = false;
 
         // Levantar SOLO el vaso clickeado
         cup.LiftAndLock();
 
-        bool win = !cup.hasBall;
+        bool win = !cup.HasBall;
 
         // 🔥 OUTPUT DE ESTADO (por ahora solo consola)
         if (win)
@@ -294,9 +299,9 @@ public class MiniGameManager : MonoBehaviour
         // Reveal final
         foreach (var cup in cups)
         {
-            cup.SetBallVisible(cup.hasBall);
+            cup.SetBallVisible(cup.HasBall);
             cup.StartRevealSequence(this, revealVisualDuration);
-            yield return new WaitForSeconds(0.05f);
+            yield return _waitSmall;
         }
 
         if (audioSource)
@@ -310,7 +315,7 @@ public class MiniGameManager : MonoBehaviour
         if (playerWon) OnRoundFinishedWin?.Invoke();
         else OnRoundFinishedLose?.Invoke();
 
-        yield return new WaitForSeconds(1f);
+        yield return _waitOneSecond;
 
         _roundActive = false;
         UpdateInstruction("Pulsa iniciar para jugar de nuevo");

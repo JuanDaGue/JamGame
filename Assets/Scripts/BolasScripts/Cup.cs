@@ -7,43 +7,49 @@ public class Cup : MonoBehaviour
 {
     [Header("References")]
     [Tooltip("Transform visual que se levanta (child).")]
-    public Transform visual;
+    [SerializeField] private Transform visual;
+    public Transform Visual => visual;
 
     [Tooltip("GameObject que representa la bola dentro del vaso.")]
-    public GameObject ballVisual;
+    [SerializeField] private GameObject ballVisual;
 
     [Header("State")]
     [Tooltip("Índice lógico de posición (ShuffleManager).")]
-    public int currentIndex = 0;
+    [SerializeField] private int currentIndex = 0;
+    public int CurrentIndex { get => currentIndex; set => currentIndex = value; }
 
     [Tooltip("Indica si este vaso tiene bola.")]
-    public bool hasBall = false;
+    [SerializeField] private bool hasBall = false;
+    public bool HasBall => hasBall;
 
     [Tooltip("¿Puede ser seleccionado por el jugador?")]
-    public bool selectable = false;
+    [SerializeField] private bool selectable = false;
+    public bool Selectable { get => selectable; set => selectable = value; }
 
     [Header("Movement")]
     [Tooltip("Altura vertical al levantar el vaso.")]
-    public float liftHeight = 0.35f;
+    [SerializeField] private float liftHeight = 0.35f;
 
     [Tooltip("Altura del arco durante swaps.")]
-    public float moveArcHeight = 0.25f;
+    [SerializeField] private float moveArcHeight = 0.25f;
 
     [Tooltip("Duración del lift / lower.")]
-    public float liftDuration = 0.3f;
+    [SerializeField] private float liftDuration = 0.3f;
 
     [Tooltip("Permite selección con mouse (debug).")]
-    public bool enableOnMouseDown = true;
+    [SerializeField] private bool enableOnMouseDown = true;
 
     [Header("Audio (Optional)")]
-    public AudioSource audioSource;
-    public AudioClip moveClip;
-    public AudioClip revealClip;
-    public AudioClip selectClip;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip moveClip;
+    [SerializeField] private AudioClip revealClip;
+    [SerializeField] private AudioClip selectClip;
 
     [Header("Events")]
-    public UnityEvent OnSelected;
-    public UnityEvent OnMoveComplete;
+    [SerializeField] private UnityEvent onSelected;
+    public UnityEvent OnSelected => onSelected;
+    [SerializeField] private UnityEvent onMoveComplete;
+    public UnityEvent OnMoveComplete => onMoveComplete;
 
     // ======================================================
     // INTERNAL

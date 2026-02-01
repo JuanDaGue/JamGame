@@ -1,17 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
     [SerializeField] private float jumpForce = 2.5f;
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private Transform cameraTransform; 
+    [SerializeField] private Transform cameraTransform;
 
     //private Animator animator;
     private Rigidbody rb;
     private bool isGround;
     private Vector2 moveInput;
-    [SerializeField] private string takeoffStateName = "Takeoff";
 
     void Start()
     {
@@ -58,7 +58,7 @@ public class Player : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.15f);
         }
-        float speed = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z).magnitude;
+        // float speed = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z).magnitude;
         //animator.SetFloat("speed", speed);
     }
 

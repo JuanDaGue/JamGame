@@ -9,15 +9,15 @@ namespace GameJam.MiniGames
     {
         [Header("Recompensa")]
         [Tooltip("La máscara que se entrega al ganar este minijuego")]
-        public CollectibleData rewardMask;
+        [SerializeField] private CollectibleData rewardMask;
 
         [Header("Navegación")]
 #if UNITY_EDITOR
         [Tooltip("Arrastra aquí el archivo de la escena Hub")]
-        public UnityEditor.SceneAsset hubSceneFile;
+        [SerializeField] private UnityEditor.SceneAsset hubSceneFile;
 #endif
         [Tooltip("Nombre de la escena Hub (Automático)")]
-        public string hubSceneName = "Carnival";
+        [SerializeField] private string hubSceneName = "Carnival";
 
         private void OnValidate()
         {

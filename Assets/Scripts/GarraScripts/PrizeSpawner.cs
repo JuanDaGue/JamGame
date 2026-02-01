@@ -4,28 +4,28 @@ public class PrizeSpawner : MonoBehaviour
 {
     [Header("References")]
     [Tooltip("Claw controller that fires OnReachedBottom.")]
-    public ClawController_RailY clawController;
+    [SerializeField] private ClawController_RailY clawController;
 
     [Tooltip("Table that decides which prize is spawned.")]
-    public PrizeTable prizeTable;
+    [SerializeField] private PrizeTable prizeTable;
 
     [Tooltip("Point where the prize will be instantiated (usually child of the claw).")]
-    public Transform spawnPoint;
+    [SerializeField] private Transform spawnPoint;
 
     [Header("Spawn Options")]
     [Tooltip("If true, the spawned prize will be parented to the spawnPoint.")]
-    public bool parentToSpawnPoint = true;
+    [SerializeField] private bool parentToSpawnPoint = true;
 
     [Tooltip("Optional random offset (local) to avoid perfect alignment.")]
-    public Vector3 randomLocalOffset;
+    [SerializeField] private Vector3 randomLocalOffset;
 
     [Header("Debug")]
-    public GameObject currentPrize;
+    [SerializeField] private GameObject currentPrize;
 
     void Awake()
     {
         if (!clawController)
-            clawController = FindObjectOfType<ClawController_RailY>();
+            clawController = FindFirstObjectByType<ClawController_RailY>();
 
         if (clawController)
             clawController.OnReachedBottom += HandleReachedBottom;
