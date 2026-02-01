@@ -1,45 +1,46 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
 public class ClawController_RailY : MonoBehaviour
 {
     public enum ClawState { Move, Dropping, Raising, Cooldown }
 
     [Header("Rig References")]
-    public Transform railRig;     // Moves in local Y
-    public Transform carriage;    // Moves in local X (child of railRig)
+    [SerializeField] private Transform railRig;     // Moves in local Y
+    [SerializeField] private Transform carriage;    // Moves in local X (child of railRig)
 
     [Header("Horizontal Limits (children of railRig)")]
-    public Transform leftLimit;
-    public Transform rightLimit;
+    [SerializeField] private Transform leftLimit;
+    [SerializeField] private Transform rightLimit;
 
     [Header("Vertical Setup (explicit local Y)")]
-    public float topLocalY = 0f;
-    public float bottomLocalY = -2f;
+    [SerializeField] private float topLocalY = 0f;
+    [SerializeField] private float bottomLocalY = -2f;
 
     [Header("Speeds")]
-    public float horizontalSpeed = 4f;
-    public float dropSpeed = 6f;
-    public float raiseSpeed = 2f;
+    [SerializeField] private float horizontalSpeed = 4f;
+    [SerializeField] private float dropSpeed = 6f;
+    [SerializeField] private float raiseSpeed = 2f;
 
     [Header("Input")]
-    public KeyCode dropKey = KeyCode.Mouse0;
-    public string horizontalAxis = "Horizontal";
-    public bool allowKeyboardAxis = true;
+    [SerializeField] private KeyCode dropKey = KeyCode.Mouse0;
+    [SerializeField] private string horizontalAxis = "Horizontal";
+    [SerializeField] private bool allowKeyboardAxis = true;
 
     [Header("Tuning")]
-    public float arriveEpsilon = 0.001f;
-    public float cooldownSeconds = 0.2f;
+    [SerializeField] private float arriveEpsilon = 0.001f;
+    [SerializeField] private float cooldownSeconds = 0.2f;
 
     [Header("Physics / Conflicts")]
     [Tooltip("If railRig has Rigidbody, force it to kinematic to avoid physics fighting the script.")]
-    public bool forceKinematicIfRigidbody = true;
+    [SerializeField] private bool forceKinematicIfRigidbody = true;
 
     [Tooltip("Debug: warns if Y stops changing while in Raising/Dropping.")]
-    public bool watchdogLog = false;
+    [SerializeField] private bool watchdogLog = false;
 
     [Header("Debug")]
-    public ClawState state = ClawState.Move;
+    [SerializeField] private ClawState state = ClawState.Move;
+    public ClawState State => state;
 
     public event Action OnReachedBottom;
     public event Action OnReachedTop;

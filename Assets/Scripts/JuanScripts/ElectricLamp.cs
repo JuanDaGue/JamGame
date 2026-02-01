@@ -3,7 +3,7 @@ using UnityEngine;
 public class ElectricLamp : MonoBehaviour
 {
     [Header("Electrocution")]
-    public float electrifyDuration = 2.5f;
+    [SerializeField] private float electrifyDuration = 2.5f;
 
     private bool waterElectrified;
     private float electrifyEndTime;
@@ -50,7 +50,7 @@ public class ElectricLamp : MonoBehaviour
     {
         waterElectrified = true;
         electrifyEndTime = Time.time + electrifyDuration;
-       
+
     }
 
     // Llama esto desde un “ElectrocutionZone” dentro del agua (ver abajo)

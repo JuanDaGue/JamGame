@@ -7,38 +7,40 @@ using UnityEngine.Events;
 public class ShuffleManager : MonoBehaviour
 {
     [Header("References")]
-    public List<Cup> cups = new List<Cup>();
-    public List<Transform> positions = new List<Transform>();
+    [SerializeField] private List<Cup> cups = new List<Cup>();
+    [SerializeField] private List<Transform> positions = new List<Transform>();
 
     [Header("Shuffle Parameters")]
     [Tooltip("Cantidad de intercambios durante el shuffle.")]
-    public int swapCount = 10;
+    [SerializeField] private int swapCount = 10;
 
     [Tooltip("Duración mínima de un swap.")]
-    public float minDuration = 0.18f;
+    [SerializeField] private float minDuration = 0.18f;
 
     [Tooltip("Duración máxima de un swap.")]
-    public float maxDuration = 0.45f;
+    [SerializeField] private float maxDuration = 0.45f;
 
     [Tooltip("Multiplicador de velocidad global.")]
-    public float speedMultiplier = 1f;
+    [SerializeField] private float speedMultiplier = 1f;
+    public float SpeedMultiplier { get => speedMultiplier; set => speedMultiplier = value; }
 
     [Range(0.1f, 1f)]
     [Tooltip("Qué tanto se superponen los swaps.")]
-    public float overlapFactor = 0.95f;
+    [SerializeField] private float overlapFactor = 0.95f;
 
     [Header("Trolling (Opcional)")]
-    public bool allowGhostSwaps = true;
+    [SerializeField] private bool allowGhostSwaps = true;
 
     [Range(0f, 1f)]
-    public float ghostSwapChance = 0.12f;
+    [SerializeField] private float ghostSwapChance = 0.12f;
 
     [Header("Debug")]
-    public bool useDebugSeed = false;
-    public int debugSeed = 12345;
+    [SerializeField] private bool useDebugSeed = false;
+    [SerializeField] private int debugSeed = 12345;
 
     [Header("Events")]
-    public UnityEvent OnShuffleComplete;
+    [SerializeField] private UnityEvent onShuffleComplete;
+    public UnityEvent OnShuffleComplete => onShuffleComplete;
 
     private Coroutine _shuffleRoutine;
     public bool IsShuffling { get; private set; }
@@ -90,7 +92,7 @@ public class ShuffleManager : MonoBehaviour
         foreach (var cup in cups)
         {
             if (cup != null)
-                cup.selectable = false;
+                cup.Selectable = false;
         }
 
         int cupCount = cups.Count;
@@ -115,8 +117,8 @@ public class ShuffleManager : MonoBehaviour
             if (cupA == null || cupB == null)
                 continue;
 
-            int idxA = cupA.currentIndex;
-            int idxB = cupB.currentIndex;
+            int idxA = cupA.CurrentIndex;
+            int idxB = cupB.CurrentIndex;
 
             Vector3 posA = positions[idxA].position;
             Vector3 posB = positions[idxB].position;
@@ -144,8 +146,8 @@ public class ShuffleManager : MonoBehaviour
             else
             {
                 // 🔁 Swap real (lógico + visual)
-                cupA.currentIndex = idxB;
-                cupB.currentIndex = idxA;
+                cupA.CurrentIndex = idxB;
+                cupB.CurrentIndex = idxA;
 
                 cupA.StartMoveTo(posB, duration);
                 cupB.StartMoveTo(posA, duration);
@@ -160,11 +162,11 @@ public class ShuffleManager : MonoBehaviour
         // ✅ Fijar posiciones finales + actualizar base local
         foreach (var cup in cups)
         {
-            if (cup == null || cup.visual == null)
+            if (cup == null || cup.Visual == null)
                 continue;
 
-            int idx = Mathf.Clamp(cup.currentIndex, 0, positions.Count - 1);
-            cup.visual.position = positions[idx].position;
+            int idx = Mathf.Clamp(cup.CurrentIndex, 0, positions.Count - 1);
+            cup.Visual.position = positions[idx].position;
 
             // 🔥 CRÍTICO: base correcta para Lift / Lower
             cup.UpdateBasePosition();
@@ -185,11 +187,11 @@ public class ShuffleManager : MonoBehaviour
     {
         foreach (var cup in cups)
         {
-            if (cup == null || cup.visual == null)
+            if (cup == null || cup.Visual == null)
                 continue;
 
-            int idx = Mathf.Clamp(cup.currentIndex, 0, positions.Count - 1);
-            cup.visual.position = positions[idx].position;
+            int idx = Mathf.Clamp(cup.CurrentIndex, 0, positions.Count - 1);
+            cup.Visual.position = positions[idx].position;
             cup.UpdateBasePosition();
         }
     }

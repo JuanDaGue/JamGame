@@ -4,17 +4,18 @@ using UnityEngine;
 public class EnemyStateController : MonoBehaviour
 {
     public enum EnemyState { Waiting, Angry, Dead, Attack }
-    public event  System.Action  OnAttack;
+    public event Action OnAttack;
 
     [Header("Refs")]
-    public Animator animator; // opcional
+    [SerializeField] private Animator animator; // opcional
 
     [Header("State")]
-    public EnemyState state = EnemyState.Waiting;
+    [SerializeField] private EnemyState state = EnemyState.Waiting;
+    public EnemyState State => state;
     public bool isInWater { get; private set; }
 
     [Header("Attack Timing")]
-    public float timeToAttack = 15f; // segundos para pasar de Angry a Attack
+    [SerializeField] private float timeToAttack = 15f; // segundos para pasar de Angry a Attack
     private float angryStartTime;
 
     void Start()

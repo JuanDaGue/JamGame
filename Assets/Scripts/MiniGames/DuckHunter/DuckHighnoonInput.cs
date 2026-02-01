@@ -7,12 +7,12 @@ namespace GameJam.MiniGames.DuckHunter
     {
         [Header("Configuración Input System")]
         [Tooltip("Arrastra aquí la referencia a la acción de Disparo (Click Izquierdo)")]
-        public InputActionReference shootAction;
+        [SerializeField] private InputActionReference shootAction;
 
         [Header("Referencias")]
-        public Camera mainCamera;
+        [SerializeField] private Camera mainCamera;
         [Tooltip("LayerMask para solo pegar a los objetivos")]
-        public LayerMask targetLayer;
+        [SerializeField] private LayerMask targetLayer;
 
         private void OnEnable()
         {
@@ -35,25 +35,27 @@ namespace GameJam.MiniGames.DuckHunter
         private void OnShoot(InputAction.CallbackContext context)
         {
             if (mainCamera == null) mainCamera = Camera.main;
+            if (mainCamera == null) return;
 
-            // Raycast al centro de la pantalla si es FPS estático,
-            // o a la posición del mouse si es estilo shooter 2D.
-            // El usuario pidió "FPS Estático y click izquierdo". 
-            // Asumimos cursor bloqueado al centro? O puntero libre?
-            // "FPS estático... player fijo en un punto, se puede mover es la mira" 
-            // -> Esto suena a que mueves la cámara con el mouse. El disparo va al centro.
-            
-            Ray ray = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-            // Si "se mueve la mira" significa cursor libre en pantalla fija, sería ScreenPointToRay(Mouse.position).
-            // Ante la duda en FPS, el centro es lo estándar.
-            
+            // Usamos la posición del mouse para el raycast (Point & Click clásico)
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+            Ray ray = mainCamera.ScreenPointToRay(mousePos);
+
+            // Debug para ver el rayo en la Scene View
+            Debug.DrawRay(ray.origin, ray.direction * 100f, Color.yellow, 1f);
+
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, targetLayer))
             {
-                DuckTarget target = hit.collider.GetComponent<DuckTarget>();
-                if (target != null)
+                if (hit.collider.TryGetComponent<DuckTarget>(out var target))
                 {
+                    Debug.Log($"[DuckInput] Hit target: {target.name}");
                     target.OnHit();
                 }
+            }
+            else
+            {
+                // Feedback visual si fallamos
+                Debug.Log("[DuckInput] Missed shot.");
             }
         }
     }

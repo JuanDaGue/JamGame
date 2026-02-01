@@ -10,17 +10,17 @@ namespace GameJam.Interactions
         [Header("Configuración del Stand")]
 #if UNITY_EDITOR
         [Tooltip("Arrastra aquí el archivo de la escena")]
-        public UnityEditor.SceneAsset minigameSceneFile;
+        [SerializeField] private UnityEditor.SceneAsset minigameSceneFile;
 #endif
         [Tooltip("Nombre de la escena (Se llena automático al arrastrar el archivo arriba)")]
-        public string minigameSceneName;
+        [SerializeField] private string minigameSceneName;
 
         [Tooltip("La máscara que se gana en este minijuego (para mostrar estado)")]
-        public CollectibleData associatedMask;
+        [SerializeField] private CollectibleData associatedMask;
 
         [Header("Estado Visual")]
         [Tooltip("Objeto visual que indica que ya completaste este nivel (ej: la máscara flotando)")]
-        public GameObject completedIndicator;
+        [SerializeField] private GameObject completedIndicator;
 
         private void OnValidate()
         {

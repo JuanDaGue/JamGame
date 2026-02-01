@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Route : MonoBehaviour
 {
-    public Transform[] waypoints;
+    [SerializeField] private Transform[] waypoints;
 
     void Reset()
     {
