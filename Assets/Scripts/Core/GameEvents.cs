@@ -32,5 +32,7 @@ namespace GameJam.Core
         // =================================================================================
         // public static Action OnMiniGameStart;
         // public static Action OnMiniGameEnd;
+        public static Action<int, int> OnLivesChanged; // current, max
+        public static Action OnPlayerDied;
     }
 }

@@ -998,13 +998,13 @@ MonoBehaviour:
   winClip: {fileID: 0}
   loseClip: {fileID: 0}
   revealAllClip: {fileID: 0}
-  OnRoundStarted:
+  onRoundStarted:
     m_PersistentCalls:
       m_Calls: []
-  OnRoundFinishedWin:
+  onRoundFinishedWin:
     m_PersistentCalls:
       m_Calls: []
-  OnRoundFinishedLose:
+  onRoundFinishedLose:
     m_PersistentCalls:
       m_Calls: []
   autoStart: 1
@@ -1103,21 +1103,9 @@ MonoBehaviour:
   ghostSwapChance: 0.12
   useDebugSeed: 0
   debugSeed: 12345
-  OnShuffleComplete:
+  onShuffleComplete:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1821983362}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: OnShuffleFinished
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!4 &1971100814
 Transform:
   m_ObjectHideFlags: 0

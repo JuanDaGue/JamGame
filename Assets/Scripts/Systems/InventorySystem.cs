@@ -98,5 +98,20 @@ namespace GameJam.Systems
             if (string.IsNullOrEmpty(itemId)) return false;
             return collectedItemIds.Contains(itemId);
         }
+
+         public IReadOnlyCollection<CollectibleData> GetCollectedItems()
+        {
+            return collectedItems.Values;
+        }
+
+        public bool TryGetItemById(string itemId, out CollectibleData item)
+        {
+            if (string.IsNullOrEmpty(itemId))
+            {
+                item = null;
+                return false;
+            }
+            return collectedItems.TryGetValue(itemId, out item);
+        }
     }
 }
