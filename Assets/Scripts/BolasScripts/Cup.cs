@@ -24,6 +24,10 @@ public class Cup : MonoBehaviour
 
     [Tooltip("¿Puede ser seleccionado por el jugador?")]
     [SerializeField] private bool selectable = false;
+
+    /// <summary>
+    /// Acceso público seguro para que otros sistemas (MiniGameManager) habiliten/deshabiliten selección.
+    /// </summary>
     public bool Selectable { get => selectable; set => selectable = value; }
 
     [Header("Movement")]
@@ -48,6 +52,7 @@ public class Cup : MonoBehaviour
     [Header("Events")]
     [SerializeField] private UnityEvent onSelected;
     public UnityEvent OnSelected => onSelected;
+
     [SerializeField] private UnityEvent onMoveComplete;
     public UnityEvent OnMoveComplete => onMoveComplete;
 
@@ -56,6 +61,8 @@ public class Cup : MonoBehaviour
     // ======================================================
 
     private Coroutine _moveCoroutine;
+    private Coroutine _liftCoroutine;
+
     private Vector3 _baseLocalPos; // base local del visual (solo Y usado para lift)
     private bool _isMoving = false;
     private bool _lockedUp = false;
@@ -83,10 +90,7 @@ public class Cup : MonoBehaviour
         // Guardamos la posición local base del visual (para lift/lower)
         _baseLocalPos = visual.localPosition;
 
-        // Seguridad: preferible tener collider en el root (GameObject con este script)
-        // y NO colliders en hijos; si quieres, desactiva coliders hijos aquí:
-        // foreach (var col in GetComponentsInChildren<Collider>()) if (col.gameObject != gameObject) col.enabled = false;
-
+        // Estado inicial
         SetBallVisible(false);
     }
 
@@ -124,7 +128,7 @@ public class Cup : MonoBehaviour
     {
         _isMoving = true;
 
-        Vector3 start = transform.position; // <-- mover el root, no el visual
+        Vector3 start = transform.position; // mover el root
         float elapsed = 0f;
 
         if (audioSource != null && moveClip != null)
@@ -139,7 +143,7 @@ public class Cup : MonoBehaviour
             Vector3 pos = Vector3.Lerp(start, targetPos, ease);
             pos += Vector3.up * Mathf.Sin(ease * Mathf.PI) * moveArcHeight;
 
-            transform.position = pos; // <-- aquí
+            transform.position = pos;
             yield return null;
         }
 
@@ -168,15 +172,17 @@ public class Cup : MonoBehaviour
     public void Lift()
     {
         if (_lockedUp) return;
+
         CancelMove();
-        StartCoroutine(LiftLowerCoroutine(true));
+        StartLiftCoroutine(true);
     }
 
     public void Lower()
     {
         if (_lockedUp) return;
+
         CancelMove();
-        StartCoroutine(LiftLowerCoroutine(false));
+        StartLiftCoroutine(false);
     }
 
     /// <summary>
@@ -186,8 +192,8 @@ public class Cup : MonoBehaviour
     {
         CancelMove();
         _lockedUp = true;
-        selectable = false;
-        StartCoroutine(LiftLowerCoroutine(true));
+        Selectable = false;
+        StartLiftCoroutine(true);
     }
 
     /// <summary>
@@ -196,10 +202,28 @@ public class Cup : MonoBehaviour
     public void ResetLift()
     {
         CancelMove();
+        StopLiftCoroutine();
+
         _lockedUp = false;
-        selectable = false;
+        Selectable = false;
+
         if (visual != null)
             visual.localPosition = _baseLocalPos;
+    }
+
+    private void StartLiftCoroutine(bool up)
+    {
+        StopLiftCoroutine();
+        _liftCoroutine = StartCoroutine(LiftLowerCoroutine(up));
+    }
+
+    private void StopLiftCoroutine()
+    {
+        if (_liftCoroutine != null)
+        {
+            StopCoroutine(_liftCoroutine);
+            _liftCoroutine = null;
+        }
     }
 
     private IEnumerator LiftLowerCoroutine(bool up)
@@ -222,6 +246,7 @@ public class Cup : MonoBehaviour
 
         visual.localPosition = target;
         _isMoving = false;
+        _liftCoroutine = null;
     }
 
     // ======================================================
@@ -246,7 +271,7 @@ public class Cup : MonoBehaviour
 
     public void OnPlayerSelect()
     {
-        if (!selectable || _isMoving || _lockedUp) return;
+        if (!Selectable || _isMoving || _lockedUp) return;
 
         if (audioSource != null && selectClip != null)
             audioSource.PlayOneShot(selectClip);

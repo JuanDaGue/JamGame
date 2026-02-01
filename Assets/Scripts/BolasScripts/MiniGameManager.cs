@@ -1,57 +1,79 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using GameJam.MiniGames;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using GameJam.MiniGames; // MinigameController (nuevo sistema)
 
 [DisallowMultipleComponent]
 public class MiniGameManager : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private ShuffleManager shuffleManager;
-    [SerializeField] private List<Cup> cups = new();
-
-    [Header("Progression / Scene Flow (NEW)")]
-    [Tooltip("Referencia al MinigameController de esta escena (recomendado asignarlo en Inspector).")]
-    public MinigameController minigameController;
+    public ShuffleManager shuffleManager;
+    public List<Cup> cups = new List<Cup>();
 
     [Header("Round Parameters")]
     [Tooltip("Tiempo que las bolas permanecen visibles al inicio.")]
-    [SerializeField] private float initialRevealTime = 1.2f;
+    public float initialRevealTime = 1.2f;
 
     [Tooltip("Duración del levantar / bajar vasos.")]
-    [SerializeField] private float liftDuration = 0.35f;
+    public float liftDuration = 0.35f;
 
     [Tooltip("Duración del pop visual al revelar bolas.")]
-    [SerializeField] private float revealVisualDuration = 0.18f;
+    public float revealVisualDuration = 0.18f;
 
     [Range(1, 2)]
     [Tooltip("Cantidad de bolas activas.")]
-    [SerializeField] private int ballsToPlace = 2;
+    public int ballsToPlace = 2;
 
     [Header("UI (Optional)")]
-    [SerializeField] private Text instructionText;
-    [SerializeField] private Button startButton;
-    [SerializeField] private Slider speedSlider;
+    public Text instructionText;
+    public Button startButton;
+    public Slider speedSlider;
 
     [Header("Audio (Optional)")]
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip winClip;
-    [SerializeField] private AudioClip loseClip;
-    [SerializeField] private AudioClip revealAllClip;
+    public AudioSource audioSource;
+    public AudioClip winClip;
+    public AudioClip loseClip;
+    public AudioClip revealAllClip;
 
     [Header("Events")]
-    [SerializeField] private UnityEvent onRoundStarted;
-    public UnityEvent OnRoundStarted => onRoundStarted;
-    [SerializeField] private UnityEvent onRoundFinishedWin;
-    public UnityEvent OnRoundFinishedWin => onRoundFinishedWin;
-    [SerializeField] private UnityEvent onRoundFinishedLose;
-    public UnityEvent OnRoundFinishedLose => onRoundFinishedLose;
+    public UnityEvent OnRoundStarted;
+    public UnityEvent OnRoundFinishedWin;
+    public UnityEvent OnRoundFinishedLose;
 
     [Header("Debug / Flow")]
     [Tooltip("Si true la ronda arrancará automáticamente al Start (útil para testing).")]
-    [SerializeField] private bool autoStart = true;
+    public bool autoStart = true;
+
+    // ======================================================
+    // LOSE SEQUENCE (NPC + BLINK + VFX + RETURN HUB)
+    // ======================================================
+
+    [Header("Lose Sequence (Opcional)")]
+    [Tooltip("Componente que dispara la animación de explosión del NPC.")]
+    public NPCDeathAnimator npcDeathAnimator;
+
+    [Tooltip("Componente que hace parpadear las bolas en rojo (idealmente 3 veces).")]
+    public BallBlinker ballBlinker;
+
+    [Tooltip("Prefab VFX de explosión (instanciar).")]
+    public GameObject explosionVfxPrefab;
+
+    [Tooltip("Punto alternativo donde aparece el VFX si no hay cup seleccionado.")]
+    public Transform explosionVfxPoint;
+
+    [Tooltip("Tiempo para que se note la animación 'Explotion' antes del parpadeo.")]
+    public float npcExplotionLeadTime = 0.4f;
+
+    [Tooltip("Delay tras el VFX antes de salir al hub.")]
+    public float afterVfxDelay = 0.5f;
+
+    [Tooltip("MinigameController del nuevo sistema. Si es null, fallback a GameManager.Instance.GameOver().")]
+    public MinigameController minigameController;
+
+    [Tooltip("Offset vertical del VFX para que no quede clavado en el piso.")]
+    public float vfxUpOffset = 0.2f;
 
     // ======================================================
     // STATE
@@ -59,8 +81,13 @@ public class MiniGameManager : MonoBehaviour
 
     private bool _roundActive;
     private bool _canSelect;
-    private WaitForSeconds _waitSmall = new(0.05f);
-    private WaitForSeconds _waitOneSecond = new(1f);
+    private bool _isResolving;
+
+    private Cup _selectedCup; // <-- vaso seleccionado (para VFX)
+
+    // ======================================================
+    // UNITY
+    // ======================================================
 
     void Reset()
     {
@@ -71,9 +98,6 @@ public class MiniGameManager : MonoBehaviour
     void Start()
     {
         Debug.Log("[MiniGameManager] Start()");
-
-        if (minigameController == null)
-            minigameController = FindFirstObjectByType<MinigameController>();
 
         if (shuffleManager == null)
             Debug.LogError("[MiniGameManager] ShuffleManager no asignado.");
@@ -127,9 +151,9 @@ public class MiniGameManager : MonoBehaviour
 
     public void StartRound()
     {
-        if (_roundActive)
+        if (_roundActive || _isResolving)
         {
-            Debug.Log("[MiniGameManager] StartRound() ignorado: ya hay una ronda activa.");
+            Debug.Log("[MiniGameManager] StartRound() ignorado: ronda activa o resolviendo.");
             return;
         }
 
@@ -139,11 +163,6 @@ public class MiniGameManager : MonoBehaviour
             return;
         }
 
-        if (shuffleManager == null)
-        {
-            Debug.LogWarning("[MiniGameManager] StartRound(): ShuffleManager no asignado. La ronda seguirá sin mezclar.");
-        }
-
         StartCoroutine(RoundCoroutine());
     }
 
@@ -151,14 +170,18 @@ public class MiniGameManager : MonoBehaviour
     {
         _roundActive = true;
         _canSelect = false;
+        _isResolving = false;
+        _selectedCup = null;
 
         Debug.Log("[MiniGameManager] RoundCoroutine: empezando ronda.");
         UpdateInstruction("Observa dónde están las bolas…");
         OnRoundStarted?.Invoke();
 
+        // Reset total
         ClearAllBalls();
         foreach (var cup in cups)
         {
+            if (cup == null) continue;
             cup.ResetLift();
             cup.Selectable = false;
         }
@@ -167,7 +190,7 @@ public class MiniGameManager : MonoBehaviour
 
         // ⬆️ Levantar vasos
         foreach (var cup in cups)
-            cup.Lift();
+            if (cup != null) cup.Lift();
 
         yield return new WaitForSeconds(liftDuration);
 
@@ -177,7 +200,7 @@ public class MiniGameManager : MonoBehaviour
 
         // ⬇️ Bajar vasos
         foreach (var cup in cups)
-            cup.Lower();
+            if (cup != null) cup.Lower();
 
         yield return new WaitForSeconds(liftDuration * 0.9f);
 
@@ -194,7 +217,7 @@ public class MiniGameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("[MiniGameManager] No hay ShuffleManager -> OnShuffleFinished() directo.");
+            Debug.LogWarning("[MiniGameManager] No hay ShuffleManager -> OnShuffleFinished() directo.");
             OnShuffleFinished();
         }
     }
@@ -207,10 +230,11 @@ public class MiniGameManager : MonoBehaviour
     {
         if (cups == null || cups.Count == 0) return;
 
-        List<int> indices = new();
+        List<int> indices = new List<int>();
         for (int i = 0; i < cups.Count; i++)
             indices.Add(i);
 
+        // Fisher–Yates
         for (int i = 0; i < indices.Count; i++)
         {
             int j = Random.Range(i, indices.Count);
@@ -219,7 +243,10 @@ public class MiniGameManager : MonoBehaviour
 
         int maxBalls = Mathf.Min(ballsToPlace, cups.Count);
         for (int i = 0; i < maxBalls; i++)
-            cups[indices[i]].SetHasBall(true);
+        {
+            if (cups[indices[i]] != null)
+                cups[indices[i]].SetHasBall(true);
+        }
 
         Debug.Log($"[MiniGameManager] AssignBallsRandomly: colocadas {maxBalls} bolas.");
     }
@@ -227,20 +254,23 @@ public class MiniGameManager : MonoBehaviour
     private void ClearAllBalls()
     {
         foreach (var cup in cups)
-            cup.SetHasBall(false);
+            if (cup != null) cup.SetHasBall(false);
     }
 
     private void ShowAllBalls()
     {
         foreach (var cup in cups)
+        {
+            if (cup == null) continue;
             if (cup.HasBall)
                 cup.SetBallVisible(true);
+        }
     }
 
     private void HideAllBalls()
     {
         foreach (var cup in cups)
-            cup.SetBallVisible(false);
+            if (cup != null) cup.SetBallVisible(false);
     }
 
     // ======================================================
@@ -249,31 +279,35 @@ public class MiniGameManager : MonoBehaviour
 
     public void OnShuffleFinished()
     {
+        if (!_roundActive) return;
+
         Debug.Log("[MiniGameManager] OnShuffleFinished() recibida.");
         _canSelect = true;
 
         foreach (var cup in cups)
-            cup.Selectable = true;
+            if (cup != null) cup.Selectable = true;
 
         UpdateInstruction("Encuentra el vaso vacío");
     }
 
     public void OnPlayerSelect(Cup cup)
     {
-        if (!_roundActive || !_canSelect || cup == null)
+        if (!_roundActive || !_canSelect || _isResolving || cup == null)
             return;
 
+        _selectedCup = cup; // <-- guardamos el vaso elegido (para el VFX)
+
+        _isResolving = true;
         _canSelect = false;
 
+        // Bloquear todos inmediatamente
         foreach (var c in cups)
-            c.Selectable = false;
+            if (c != null) c.Selectable = false;
 
+        // Levantar SOLO el vaso clickeado
         cup.LiftAndLock();
 
         bool win = !cup.HasBall;
-
-        Debug.Log(win ? "[MiniGameManager] WIN" : "[MiniGameManager] LOSE");
-
         StartCoroutine(ResolveSelection(win));
     }
 
@@ -284,11 +318,13 @@ public class MiniGameManager : MonoBehaviour
         if (audioSource && revealAllClip)
             audioSource.PlayOneShot(revealAllClip);
 
+        // Reveal final
         foreach (var cup in cups)
         {
+            if (cup == null) continue;
             cup.SetBallVisible(cup.HasBall);
             cup.StartRevealSequence(this, revealVisualDuration);
-            yield return _waitSmall;
+            yield return new WaitForSeconds(0.05f);
         }
 
         if (audioSource)
@@ -302,23 +338,68 @@ public class MiniGameManager : MonoBehaviour
         if (playerWon) OnRoundFinishedWin?.Invoke();
         else OnRoundFinishedLose?.Invoke();
 
-        // Pequeña pausa para feedback
-        yield return _waitOneSecond;
+        yield return new WaitForSeconds(0.35f);
 
-        _roundActive = false;
-        UpdateInstruction("Pulsa iniciar para jugar de nuevo");
-
-        // NEW SYSTEM HOOK:
-        // Al terminar la ronda, enviamos resultado al sistema global y volvemos al Hub.
-        // Si quieres permitir "reintentar" sin salir, coméntalo y maneja el retorno desde UI.
-        if (minigameController != null)
+        if (playerWon)
         {
-            if (playerWon) minigameController.WinGame();
-            else minigameController.LoseGame();
+            Debug.Log("[MiniGameManager] WIN");
+            _roundActive = false;
+            _isResolving = false;
+            UpdateInstruction("Pulsa iniciar para jugar de nuevo");
         }
         else
         {
-            Debug.LogWarning("[MiniGameManager] No se encontró MinigameController. No se puede volver al Hub.");
+            Debug.Log("[MiniGameManager] LOSE -> LoseSequence()");
+            yield return LoseSequence();
+        }
+    }
+
+    private IEnumerator LoseSequence()
+    {
+        // Asegurar bloqueo total
+        _canSelect = false;
+        foreach (var c in cups)
+            if (c != null) c.Selectable = false;
+
+        // 1) NPC entra a Explotion (si existe)
+        if (npcDeathAnimator != null)
+            npcDeathAnimator.PlayExplotion();
+
+        if (npcExplotionLeadTime > 0f)
+            yield return new WaitForSeconds(npcExplotionLeadTime);
+
+        // 2) Bolas parpadean rojo (si existe)
+        if (ballBlinker != null)
+            yield return ballBlinker.BlinkRoutine();
+        else
+            yield return new WaitForSeconds(0.4f);
+
+        // 3) VFX Explosion SOLO si el vaso elegido tenía bola
+        if (explosionVfxPrefab != null && _selectedCup != null && _selectedCup.HasBall)
+        {
+            Transform p = (_selectedCup.Visual != null) ? _selectedCup.Visual : _selectedCup.transform;
+            Vector3 pos = p.position + Vector3.up * vfxUpOffset;
+            Instantiate(explosionVfxPrefab, pos, Quaternion.identity);
+        }
+        else if (explosionVfxPrefab != null && explosionVfxPoint != null)
+        {
+            // Fallback opcional si quieres ver algo aun sin cup/bola (puedes borrar este else si no lo deseas)
+            Vector3 pos = explosionVfxPoint.position + Vector3.up * vfxUpOffset;
+            Instantiate(explosionVfxPrefab, pos, explosionVfxPoint.rotation);
+        }
+
+        if (afterVfxDelay > 0f)
+            yield return new WaitForSeconds(afterVfxDelay);
+
+        // 4) Salir al Hub (nuevo sistema preferido)
+        if (minigameController != null)
+        {
+            minigameController.LoseGame();
+        }
+        else
+        {
+            Debug.LogWarning("[MiniGameManager] MinigameController no asignado. Fallback a GameManager.Instance.GameOver().");
+            GameManager.Instance.GameOver();
         }
     }
 

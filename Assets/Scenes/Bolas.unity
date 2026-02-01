@@ -228,6 +228,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &81340662 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6019749454481464572, guid: e571d17c8589efe46ba96151b35a16db, type: 3}
+  m_PrefabInstance: {fileID: 1806684197}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &319311955
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,6 +263,58 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1902012746}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &447793216
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 447793218}
+  - component: {fileID: 447793217}
+  m_Layer: 0
+  m_Name: BallBlinker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &447793217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447793216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae0bbb131229054419710bbc66e36ad2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ballRenderers:
+  - {fileID: 1187048006}
+  - {fileID: 2103267773}
+  - {fileID: 81340662}
+  blinkCount: 3
+  blinkOnTime: 0.12
+  blinkOffTime: 0.12
+  blinkColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!4 &447793218
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447793216}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 5.0399456, y: 4.15439, z: -3.3982968}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &498673229
 PrefabInstance:
@@ -442,6 +499,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   idleParameterName: IsInIdle
+--- !u!114 &945557394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 945557389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d120d8d7171526c4f8e81e84c274e2c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  searchInChildren: 1
+  useTrigger: 0
+  explotionBool: IsExplotion
+  explotionTrigger: Explotion
+  forceStateByName: 0
+  explotionStateName: Explotion
 --- !u!1001 &950475999
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -503,6 +578,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e571d17c8589efe46ba96151b35a16db, type: 3}
+--- !u!1 &1077881793
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1077881794}
+  m_Layer: 0
+  m_Name: ExplosionPoitn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1077881794
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077881793}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.27, y: 2.370589, z: -2.51}
+  m_LocalScale: {x: 224.74107, y: 476.61215, z: 8.753678}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1144499606
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -612,6 +718,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: adaa2d0a6b054544f8998c14230cbdc7, type: 3}
+--- !u!23 &1187048006 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6019749454481464572, guid: e571d17c8589efe46ba96151b35a16db, type: 3}
+  m_PrefabInstance: {fileID: 950475999}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1191047455
 GameObject:
   m_ObjectHideFlags: 0
@@ -941,6 +1052,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1412799958379525883, guid: 61860ccf80e028a4bb249c6f1ae4fa33, type: 3}
       insertIndex: -1
       addedObject: {fileID: 945557393}
+    - targetCorrespondingSourceObject: {fileID: 1412799958379525883, guid: 61860ccf80e028a4bb249c6f1ae4fa33, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 945557394}
   m_SourcePrefab: {fileID: 100100000, guid: 61860ccf80e028a4bb249c6f1ae4fa33, type: 3}
 --- !u!1 &1249958626
 GameObject:
@@ -974,6 +1088,7 @@ MonoBehaviour:
   rewardMask: {fileID: 0}
   hubSceneFile: {fileID: 102900000, guid: 56e9b13d0fac42649be57e9236c9e1e1, type: 3}
   hubSceneName: Main
+  notifyLegacyGameManager: 1
 --- !u!4 &1249958628
 Transform:
   m_ObjectHideFlags: 0
@@ -1254,7 +1369,6 @@ MonoBehaviour:
   - {fileID: 1343637616}
   - {fileID: 581030006}
   - {fileID: 1629659289}
-  minigameController: {fileID: 1249958627}
   initialRevealTime: 1.2
   liftDuration: 0.35
   revealVisualDuration: 0.18
@@ -1266,16 +1380,24 @@ MonoBehaviour:
   winClip: {fileID: 0}
   loseClip: {fileID: 0}
   revealAllClip: {fileID: 0}
-  onRoundStarted:
+  OnRoundStarted:
     m_PersistentCalls:
       m_Calls: []
-  onRoundFinishedWin:
+  OnRoundFinishedWin:
     m_PersistentCalls:
       m_Calls: []
-  onRoundFinishedLose:
+  OnRoundFinishedLose:
     m_PersistentCalls:
       m_Calls: []
   autoStart: 1
+  npcDeathAnimator: {fileID: 945557394}
+  ballBlinker: {fileID: 447793217}
+  explosionVfxPrefab: {fileID: 8581856717499879852, guid: b48a157e4089f324bb832c1f544019a8, type: 3}
+  explosionVfxPoint: {fileID: 1077881794}
+  npcExplotionLeadTime: 0.4
+  afterVfxDelay: 0.5
+  minigameController: {fileID: 1249958627}
+  vfxUpOffset: 0.2
 --- !u!4 &1821983363
 Transform:
   m_ObjectHideFlags: 0
@@ -1420,6 +1542,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1902012746}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &2103267773 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6019749454481464572, guid: e571d17c8589efe46ba96151b35a16db, type: 3}
+  m_PrefabInstance: {fileID: 750285968}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1436,3 +1563,5 @@ SceneRoots:
   - {fileID: 1219611862}
   - {fileID: 9924584}
   - {fileID: 1739493987}
+  - {fileID: 447793218}
+  - {fileID: 1077881794}
