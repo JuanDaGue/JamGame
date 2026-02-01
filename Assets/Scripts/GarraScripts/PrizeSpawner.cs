@@ -21,6 +21,7 @@ public class PrizeSpawner : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private GameObject currentPrize;
+    public GameObject CurrentPrize => currentPrize;
 
     void Awake()
     {

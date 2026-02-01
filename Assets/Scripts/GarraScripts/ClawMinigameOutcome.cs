@@ -41,7 +41,7 @@ public class ClawMinigameOutcome : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[ClawMinigameOutcome] No se encontró ClawController_RailY.");
+            Debug.LogWarning("[ClawMinigameOutcome] No se encontrï¿½ ClawController_RailY.");
         }
     }
 
@@ -79,25 +79,25 @@ public class ClawMinigameOutcome : MonoBehaviour
             return;
         }
 
-        if (prizeSpawner == null || prizeSpawner.currentPrize == null)
+        if (prizeSpawner == null || prizeSpawner.CurrentPrize == null)
         {
-            // Si no hay premio por algún motivo, trátalo como derrota (o cambia a retry si prefieres).
+            // Si no hay premio por algï¿½n motivo, trï¿½talo como derrota (o cambia a retry si prefieres).
             if (logOutcome) Debug.Log("[ClawMinigameOutcome] No hay premio instanciado -> LOSE.");
             minigameController.LoseGame();
             return;
         }
 
-        GameObject spawned = prizeSpawner.currentPrize;
+        GameObject spawned = prizeSpawner.CurrentPrize;
 
-        // Comparación robusta: puede ser instancia (Clone), entonces comparamos por nombre base o por prefab reference si coincide.
-        // Primero intentamos por prefab exacto: si parentas el premio, seguirá siendo instancia, no el prefab.
-        // Así que la forma más fiable aquí es comparar por nombre del prefab.
+        // Comparaciï¿½n robusta: puede ser instancia (Clone), entonces comparamos por nombre base o por prefab reference si coincide.
+        // Primero intentamos por prefab exacto: si parentas el premio, seguirï¿½ siendo instancia, no el prefab.
+        // Asï¿½ que la forma mï¿½s fiable aquï¿½ es comparar por nombre del prefab.
         bool isGood = IsSamePrefabByName(spawned, goodPrizePrefab);
         bool isBad = IsSamePrefabByName(spawned, badPrizePrefab);
 
         if (!isGood && !isBad)
         {
-            // Fallback: intenta por nombre literal si el prefab no está asignado
+            // Fallback: intenta por nombre literal si el prefab no estï¿½ asignado
             string n = spawned.name;
             if (n.Contains("Bueno")) isGood = true;
             else if (n.Contains("Malo")) isBad = true;
@@ -117,7 +117,7 @@ public class ClawMinigameOutcome : MonoBehaviour
             return;
         }
 
-        // Si no pudimos clasificar, mejor no bloquear: trata como derrota (o cámbialo a retry).
+        // Si no pudimos clasificar, mejor no bloquear: trata como derrota (o cï¿½mbialo a retry).
         if (logOutcome) Debug.LogWarning($"[ClawMinigameOutcome] Premio no reconocido ({spawned.name}) -> LOSE por defecto.");
         minigameController.LoseGame();
     }

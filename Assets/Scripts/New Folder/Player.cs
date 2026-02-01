@@ -14,7 +14,6 @@ public class Player : MonoBehaviour
     private Vector2 moveInput;
 
     private float idleTimer = 0f;
-    [SerializeField] private string takeoffStateName = "Takeoff";
 
     void Start()
     {
