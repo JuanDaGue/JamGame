@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e7246e35829f6041be017d592294f24, type: 3}
   m_Name: "M\xE1scara Dorada"
   m_EditorClassIdentifier: 
-  id: 3
+  id: 4
   displayName: "M\xE1scara Dorada"
   icon: {fileID: 0}
   description: "- Origen: Inspirada en tradiciones precolombinas y carnavales modernos.\r\n-
