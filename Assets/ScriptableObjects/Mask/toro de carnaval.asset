@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e7246e35829f6041be017d592294f24, type: 3}
+  m_Name: toro de carnaval
+  m_EditorClassIdentifier: 
+  id: 1
+  displayName: toro de carnaval
+  icon: {fileID: 21300000, guid: a7ddb03f8f3b9fb4d887e26b9715db18, type: 3}
+  description: "- Origen: Se remonta a 1878, ligado a tradiciones africanas de los
+    esclavos.\r\n- Significado: Representa fuerza y liderazgo; el \u201CToro mayor\u201D
+    encabeza las danzas de animales en el carnaval.\r\n- Aspecto: M\xE1scara tallada
+    en madera, pintada con colores vivos y brillantes.\r\n- Uso: Figura central en
+    comparsas, elaborada artesanalmente por talladores locales.\r\n"
