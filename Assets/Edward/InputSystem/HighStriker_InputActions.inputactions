@@ -1,0 +1,66 @@
+{
+    "version": 1,
+    "name": "HighStriker_InputActions",
+    "maps": [
+        {
+            "name": "Gameplay",
+            "id": "42064274-806c-442f-8abf-12fc8e11baac",
+            "actions": [
+                {
+                    "name": "Fire",
+                    "type": "Button",
+                    "id": "426ea9b0-3227-41df-8e6c-46b55934a50a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Point",
+                    "type": "Value",
+                    "id": "2782b9d5-ff80-43f3-b7b4-32e306df38f9",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "81ad6650-7aec-4859-890c-ac54700a3a94",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1386cdc3-9547-4134-a7d0-6fbd3a54ff01",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b9decac3-f6dd-49c7-88c5-db421a66ada9",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Point",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
