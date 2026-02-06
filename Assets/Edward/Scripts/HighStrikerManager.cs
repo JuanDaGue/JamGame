@@ -6,8 +6,8 @@ using System.Collections;
 
 public class HighStrikerManager : MonoBehaviour
 {
-    // [Header("Referencias Generales")]
-    // public Animator animatorJuego; 
+    [Header("Referencias Generales")]
+    public Animator animatorJuego;
 
     [Header("UI Referencias")]
     public Slider sliderFuerza;
@@ -122,8 +122,7 @@ public class HighStrikerManager : MonoBehaviour
     {
         estadoActual = EstadoJuego.Countdown;
 
-        // TODO: ANIMACION 
-        // if(animatorJuego != null) animatorJuego.SetTrigger("TriggerPreparado");
+        if (animatorJuego != null) animatorJuego.SetTrigger("TriggerPreparado");
 
         textoCentral.text = "3";
         yield return new WaitForSeconds(1);

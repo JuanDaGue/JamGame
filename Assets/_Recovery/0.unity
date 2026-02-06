@@ -1047,7 +1047,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7e0f10ea04ef0f43ba0255b311a1427, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighStrikerManager
-  animatorJuego: {fileID: 1675059532}
   sliderFuerza: {fileID: 1964383090}
   textoCentral: {fileID: 783071201}
   contenedorMouse: {fileID: 1249973737}
