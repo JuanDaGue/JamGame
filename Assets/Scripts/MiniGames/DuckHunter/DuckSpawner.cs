@@ -5,185 +5,183 @@ namespace GameJam.MiniGames.DuckHunter
 {
     public class DuckSpawner : MonoBehaviour
     {
-        [Header("Referencias")]
-        [SerializeField] private GameObject targetPrefab;
+        [Header("Referencias Prefabs")]
+        [Tooltip("Prefab para Pato (Horizontal)")]
+        [SerializeField] private GameObject duckPrefab;
+        [Tooltip("Prefab para Globo (Vertical)")]
+        [SerializeField] private GameObject balloonPrefab;
+        [Tooltip("Prefab para Ave (ZigZag)")]
+        [SerializeField] private GameObject birdPrefab;
+
         [SerializeField] private DuckHunterManager manager;
 
-        [Header("Configuración Linear (Laterales)")]
-        [Tooltip("Distancia lateral donde spawnean los lineales (±X)")]
-        [SerializeField] private float linearSpawnX = 12f;
-        [Tooltip("Rango Y para lineales (2/3 inferiores)")]
-        [SerializeField] private Vector2 linearSpawnYRange = new Vector2(-2f, 2f);
-        [Tooltip("Rango Z (profundidad) para lineales")]
-        [SerializeField] private Vector2 linearSpawnZRange = new Vector2(5f, 15f);
+        [Header("Configuración Pato (Duck) - Area Unificada")]
+        [Tooltip("Area donde aparecen y se mueven los patos (Spawn en extremos X, rebote en extremos X)")]
+        [SerializeField] private Vector2 duckAreaXRange = new(-23f, 23f);
+        [SerializeField] private Vector2 duckAreaYRange = new(-12f, -2f);
+        [SerializeField] private Vector2 duckAreaZRange = new(37f, 60f);
 
-        [Header("Configuración Zig-Zag (Caída desde arriba)")]
-        [Tooltip("Rango X donde pueden aparecer los zig-zag")]
-        [SerializeField] private Vector2 zigZagSpawnXRange = new Vector2(-8f, 8f);
-        [Tooltip("Altura Y desde donde caen los zig-zag")]
-        [SerializeField] private float zigZagDropHeight = 10f;
-        [Tooltip("Altura Y objetivo (tercio superior) donde quedan los zig-zag")]
-        [SerializeField] private Vector2 zigZagTargetYRange = new Vector2(2f, 4f);
-        [Tooltip("Rango Z (profundidad) para zig-zag")]
-        [SerializeField] private Vector2 zigZagSpawnZRange = new Vector2(5f, 15f);
-        [Tooltip("Duración de la animación de caída")]
-        [SerializeField] private float dropDuration = 1f;
-        [Tooltip("Ángulo inicial de rotación para simular paleta colgante")]
-        [SerializeField] private float initialPendulumAngle = 90f;
+        [Header("Configuración Ave (Bird) - Area Unificada")]
+        [Tooltip("Area donde aparecen y se mueven las aves (Spawn en extremos X, rebote en extremos X)")]
+        [SerializeField] private Vector2 birdAreaXRange = new(-23f, 23f);
+        [SerializeField] private Vector2 birdAreaYRange = new(2f, 13f);
+        [SerializeField] private Vector2 birdAreaZRange = new(37f, 60f);
 
-        [Header("Velocidad")]
-        [SerializeField] private Vector2 speedRange = new Vector2(3f, 6f);
+        [Header("Configuración Globo (Balloon) - Area Unificada")]
+        [Tooltip("Area donde aparecen y se mueven los globos (Spawn dentro, rebote en extremos Y)")]
+        [SerializeField] private Vector2 balloonAreaXRange = new(-43f, 43f);
+        [SerializeField] private Vector2 balloonAreaYRange = new(-30f, 2f); // Rango completo de movimiento vertical
+        [SerializeField] private Vector2 balloonAreaZRange = new(45f, 65f);
 
-        public void SpawnWave(int count, TargetColor realColor, TargetColor decoyColor, TargetColor neutralColor, float rate)
+        [Header("Velocidad Global")]
+        [SerializeField] private Vector2 speedRange = new(3f, 6f);
+
+        public void SpawnWave(int duckCount, int balloonCount, int birdCount,
+                              EnemyType realType, EnemyType decoyType, EnemyType neutralType, float rate)
         {
-            StartCoroutine(SpawnRoutine(count, realColor, decoyColor, neutralColor, rate));
+            StartCoroutine(SpawnRoutine(duckCount, balloonCount, birdCount, realType, decoyType, neutralType, rate));
         }
 
-        private IEnumerator SpawnRoutine(int count, TargetColor realColor, TargetColor decoyColor, TargetColor neutralColor, float rate)
+        private IEnumerator SpawnRoutine(int duckCount, int balloonCount, int birdCount,
+                                         EnemyType realType, EnemyType decoyType, EnemyType neutralType, float rate)
         {
-            TargetColor[] allColors = { realColor, decoyColor, neutralColor };
+            // 1. Crear lista de objetivos
+            System.Collections.Generic.List<EnemyType> waveComposition = new();
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < duckCount; i++) waveComposition.Add(EnemyType.Duck);
+            for (int i = 0; i < balloonCount; i++) waveComposition.Add(EnemyType.Balloon);
+            for (int i = 0; i < birdCount; i++) waveComposition.Add(EnemyType.Bird);
+
+            // 2. Shuffle (Fisher-Yates)
+            for (int i = 0; i < waveComposition.Count; i++)
             {
-                if (targetPrefab == null)
-                {
-                    Debug.LogError("[DuckSpawner] No hay prefab de objetivo.");
-                    yield break;
-                }
-
-                // Elegir color aleatorio
-                TargetColor randomColor = allColors[Random.Range(0, allColors.Length)];
-
-                // Elegir patrón aleatorio
-                MovementPattern pattern = (Random.value > 0.5f) ? MovementPattern.Linear : MovementPattern.ZigZag;
-
-                // Spawn según el patrón
-                if (pattern == MovementPattern.Linear)
-                {
-                    SpawnLinearTarget(randomColor);
-                }
-                else
-                {
-                    SpawnZigZagTarget(randomColor);
-                }
-
-                yield return new WaitForSeconds(rate);
+                EnemyType temp = waveComposition[i];
+                int randomIndex = Random.Range(i, waveComposition.Count);
+                waveComposition[i] = waveComposition[randomIndex];
+                waveComposition[randomIndex] = temp;
             }
 
-            Debug.Log("[DuckSpawner] Oleada completada.");
+#if UNITY_EDITOR
+            Debug.Log($"[DuckSpawner] Starting Wave. Total: {waveComposition.Count}");
+#endif
+
+            // 3. Spawn Loop
+            foreach (EnemyType typeToSpawn in waveComposition)
+            {
+                GameObject prefabToSpawn = GetPrefabForType(typeToSpawn);
+                if (prefabToSpawn == null) continue;
+
+                if (!prefabToSpawn.TryGetComponent(out DuckTarget targetScript)) continue;
+
+                // Spawn según patrón del Prefab con CONFIGURACIÓN UNIFICADA
+                switch (targetScript.Pattern)
+                {
+                    case MovementPattern.Vertical: // GLOBOS
+                        // Usamos balloonAreaYRange como límites de movimiento Y
+                        SpawnVerticalTarget(prefabToSpawn, typeToSpawn, balloonAreaXRange, balloonAreaYRange, balloonAreaZRange);
+                        break;
+                    case MovementPattern.ZigZag: // AVES (BIRD)
+                        // Usamos birdAreaXRange como límites de movimiento X
+                        SpawnLinearTarget(prefabToSpawn, typeToSpawn, birdAreaXRange, birdAreaYRange, birdAreaZRange);
+                        break;
+                    default: // LINEAR (DUCKS)
+                        // Usamos duckAreaXRange como límites de movimiento X
+                        SpawnLinearTarget(prefabToSpawn, typeToSpawn, duckAreaXRange, duckAreaYRange, duckAreaZRange);
+                        break;
+                }
+
+                // yield return new WaitForSeconds(rate); // DESACTIVADO: Todos aparecen al mismo tiempo
+            }
+
+#if UNITY_EDITOR
+            Debug.Log("[DuckSpawner] Wave Spawning Complete.");
+#endif
+            yield return null; // Necesario para que la corrutina termine correctamente
         }
 
-        private void SpawnLinearTarget(TargetColor color)
+        private void SpawnLinearTarget(GameObject prefab, EnemyType type, Vector2 xRange, Vector2 yRange, Vector2 zRange)
         {
-            // Spawn desde los laterales (izquierda o derecha)
-            float side = (Random.value > 0.5f) ? 1f : -1f;
-            float xPos = linearSpawnX * side;
-            float yPos = Random.Range(linearSpawnYRange.x, linearSpawnYRange.y);
-            float zPos = Random.Range(linearSpawnZRange.x, linearSpawnZRange.y);
+            // Spawn en los extremos del área X (izquierda o derecha)
+            // Lado izquierdo = xRange.x, Lado derecho = xRange.y
+            float xPos = (Random.value > 0.5f) ? xRange.y : xRange.x;
 
-            Vector3 spawnPos = new Vector3(xPos, yPos, zPos);
+            float yPos = Random.Range(yRange.x, yRange.y);
+            float zPos = Random.Range(zRange.x, zRange.y);
 
-            GameObject obj = Instantiate(targetPrefab, spawnPos, Quaternion.identity);
-            DuckTarget target = obj.GetComponent<DuckTarget>();
+            Vector3 spawnPos = new(xPos, yPos, zPos);
 
-            if (target != null)
+            GameObject obj = Instantiate(prefab, spawnPos, Quaternion.identity);
+            if (obj.TryGetComponent(out DuckTarget target))
             {
                 float speed = Random.Range(speedRange.x, speedRange.y);
-                target.Initialize(color, MovementPattern.Linear, speed, manager);
+                // Pasar límites X: Min = xRange.x, Max = xRange.y
+                target.Initialize(type, speed, manager, xRange.x, xRange.y);
             }
         }
 
-        private void SpawnZigZagTarget(TargetColor color)
+        private void SpawnVerticalTarget(GameObject prefab, EnemyType type, Vector2 xRange, Vector2 yRange, Vector2 zRange)
         {
-            // Posición X aleatoria dentro del rango
-            float xPos = Random.Range(zigZagSpawnXRange.x, zigZagSpawnXRange.y);
-            float zPos = Random.Range(zigZagSpawnZRange.x, zigZagSpawnZRange.y);
+            // Spawn dentro del área X (aleatorio)
+            float xPos = Random.Range(xRange.x, xRange.y);
+            // Spawn dentro del área Y (aleatorio), pero suele ser mejor abajo si suben
+            // Aqui usamos random en todo el rango vertical de movimiento
+            float yPos = Random.Range(yRange.x, yRange.y);
+            float zPos = Random.Range(zRange.x, zRange.y);
 
-            // Altura Y objetivo (donde quedará después de caer)
-            float targetY = Random.Range(zigZagTargetYRange.x, zigZagTargetYRange.y);
+            Vector3 spawnPos = new(xPos, yPos, zPos);
 
-            // Spawn desde arriba (fuera de vista)
-            Vector3 dropStart = new Vector3(xPos, zigZagDropHeight, zPos);
-            Vector3 dropEnd = new Vector3(xPos, targetY, zPos);
-
-            GameObject obj = Instantiate(targetPrefab, dropStart, Quaternion.identity);
-            DuckTarget target = obj.GetComponent<DuckTarget>();
-
-            if (target != null)
+            GameObject obj = Instantiate(prefab, spawnPos, Quaternion.identity);
+            if (obj.TryGetComponent(out DuckTarget target))
             {
-                float speed = Random.Range(speedRange.x, speedRange.y);
-                // Iniciar con animación de caída
-                StartCoroutine(DropAnimation(obj, target, dropEnd, color, speed));
+                float speed = Random.Range(speedRange.x, speedRange.y) * 0.5f;
+                // Pasar límites Y: Min = yRange.x, Max = yRange.y
+                target.Initialize(type, speed, manager, yRange.x, yRange.y);
             }
-        }
-
-        private IEnumerator DropAnimation(GameObject obj, DuckTarget target, Vector3 finalPosition, TargetColor color, float speed)
-        {
-            // Rotación inicial tipo paleta colgante (eje X)
-            obj.transform.rotation = Quaternion.Euler(initialPendulumAngle, 0, 0);
-
-            Vector3 startPos = obj.transform.position;
-            float elapsed = 0f;
-
-            // Animación de caída con rotación tipo péndulo
-            while (elapsed < dropDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = elapsed / dropDuration;
-
-                // Lerp de posición
-                obj.transform.position = Vector3.Lerp(startPos, finalPosition, t);
-
-                // Rotación de péndulo (de 90° a 0° en eje X)
-                float currentAngle = Mathf.Lerp(initialPendulumAngle, 0f, t);
-                obj.transform.rotation = Quaternion.Euler(currentAngle, 0, 0);
-
-                yield return null;
-            }
-
-            // Enderezar de golpe al final
-            obj.transform.position = finalPosition;
-            obj.transform.rotation = Quaternion.identity;
-
-            // Ahora inicializar el movimiento normal del target
-            target.Initialize(color, MovementPattern.ZigZag, speed, manager);
         }
 
         // Gizmos para visualizar zonas de spawn en el editor
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
-            // Zona Linear (Laterales) - Color Cyan
-            Gizmos.color = Color.cyan;
-
-            // Lateral izquierdo
-            Vector3 leftCenter = new Vector3(-linearSpawnX, (linearSpawnYRange.x + linearSpawnYRange.y) / 2f, (linearSpawnZRange.x + linearSpawnZRange.y) / 2f);
-            Vector3 leftSize = new Vector3(0.5f, linearSpawnYRange.y - linearSpawnYRange.x, linearSpawnZRange.y - linearSpawnZRange.x);
-            Gizmos.DrawWireCube(leftCenter, leftSize);
-
-            // Lateral derecho
-            Vector3 rightCenter = new Vector3(linearSpawnX, (linearSpawnYRange.x + linearSpawnYRange.y) / 2f, (linearSpawnZRange.x + linearSpawnZRange.y) / 2f);
-            Gizmos.DrawWireCube(rightCenter, leftSize);
-
-            // Zona Zig-Zag (Superior) - Color Yellow
-            Gizmos.color = Color.yellow;
-
-            // Zona de caída (arriba)
-            Vector3 dropCenter = new Vector3((zigZagSpawnXRange.x + zigZagSpawnXRange.y) / 2f, zigZagDropHeight, (zigZagSpawnZRange.x + zigZagSpawnZRange.y) / 2f);
-            Vector3 dropSize = new Vector3(zigZagSpawnXRange.y - zigZagSpawnXRange.x, 0.5f, zigZagSpawnZRange.y - zigZagSpawnZRange.x);
-            Gizmos.DrawWireCube(dropCenter, dropSize);
-
-            // Zona objetivo (donde aterrizan)
+            // --- 1. PATOS (GREEN) ---
             Gizmos.color = Color.green;
-            Vector3 targetCenter = new Vector3((zigZagSpawnXRange.x + zigZagSpawnXRange.y) / 2f, (zigZagTargetYRange.x + zigZagTargetYRange.y) / 2f, (zigZagSpawnZRange.x + zigZagSpawnZRange.y) / 2f);
-            Vector3 targetSize = new Vector3(zigZagSpawnXRange.y - zigZagSpawnXRange.x, zigZagTargetYRange.y - zigZagTargetYRange.x, zigZagSpawnZRange.y - zigZagSpawnZRange.x);
-            Gizmos.DrawWireCube(targetCenter, targetSize);
+            DrawAreaBox(duckAreaXRange, duckAreaYRange, duckAreaZRange);
 
-            // Líneas conectando zona de caída con zona objetivo
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(new Vector3(zigZagSpawnXRange.x, zigZagDropHeight, zigZagSpawnZRange.x),
-                            new Vector3(zigZagSpawnXRange.x, zigZagTargetYRange.y, zigZagSpawnZRange.x));
-            Gizmos.DrawLine(new Vector3(zigZagSpawnXRange.y, zigZagDropHeight, zigZagSpawnZRange.y),
-                            new Vector3(zigZagSpawnXRange.y, zigZagTargetYRange.y, zigZagSpawnZRange.y));
+            // --- 2. AVES (BLUE) ---
+            Gizmos.color = Color.blue;
+            DrawAreaBox(birdAreaXRange, birdAreaYRange, birdAreaZRange);
+
+            // --- 3. GLOBOS (RED) ---
+            Gizmos.color = Color.red;
+            DrawAreaBox(balloonAreaXRange, balloonAreaYRange, balloonAreaZRange);
+        }
+
+        private void DrawAreaBox(Vector2 xRange, Vector2 yRange, Vector2 zRange)
+        {
+            float centerX = (xRange.x + xRange.y) / 2f;
+            float widthX = xRange.y - xRange.x;
+
+            float centerY = (yRange.x + yRange.y) / 2f;
+            float heightY = yRange.y - yRange.x;
+
+            float centerZ = (zRange.x + zRange.y) / 2f;
+            float depthZ = zRange.y - zRange.x;
+
+            Gizmos.DrawWireCube(new Vector3(centerX, centerY, centerZ), new Vector3(widthX, heightY, depthZ));
+        }
+
+        private GameObject GetPrefabForType(EnemyType type)
+        {
+            switch (type)
+            {
+                case EnemyType.Duck: return duckPrefab;
+                case EnemyType.Balloon: return balloonPrefab;
+                case EnemyType.Bird: return birdPrefab;
+                default:
+#if UNITY_EDITOR
+                    Debug.LogWarning($"[DuckSpawner] Unknown Type: {type}");
+#endif
+                    return null;
+            }
         }
     }
 }
