@@ -10,6 +10,8 @@ namespace GameJam.MiniGames.DuckHunter
         [SerializeField] private DuckHunterUI ui;
         [SerializeField] private MinigameController controller;
         [SerializeField] private DuckHunterVFX vfxController;
+        [SerializeField] private GameOverGunSequence gunSequence;
+        [SerializeField] private PlayerGunAim playerGunAim;
 
         [Header("Configuración de Oleadas")]
         [SerializeField] private int totalWaves = 3;
@@ -20,11 +22,12 @@ namespace GameJam.MiniGames.DuckHunter
         private int currentWave = 0;
         private int realTargetsEliminated = 0;
         private int wrongTargetsEliminated = 0;
+        private readonly WaitForSeconds waveEndDelay = new(1.5f); // Cached delay
 
-        // Mapeo dinámico de Color -> Rol (cambia cada oleada)
-        private TargetColor currentRealColor;      // El color que REALMENTE suma puntos
-        private TargetColor currentDecoyColor;     // El color que la UI MIENTE que debes disparar
-        private TargetColor currentNeutralColor;   // El color neutral (error si disparas)
+        // Mapeo dinámico de Roles
+        private EnemyType currentRealType;      // Suma puntos
+        private EnemyType currentDecoyType;     // Trampa/Engaño
+        private EnemyType currentNeutralType;   // Error/Neutral
 
         private int wrongHitsThreshold = 3;
 
@@ -58,91 +61,93 @@ namespace GameJam.MiniGames.DuckHunter
             SetupWaveRules();
 
             // 2. Configurar UI para engañar al jugador
-            // La UI muestra el color Decoy (que NO debe disparar)
-            ui.SetInstruction(currentDecoyColor);
+            ui.SetInstruction(currentDecoyType);
             ui.UpdateWave(currentWave, totalWaves);
 
             // 3. Calcular umbrales 
-            // - Derrota: Si matas a la MAYORÍA de los Decoys/Neutrals.
-            //   Como spawnearán 'targetsPerColor' de cada uno, usaremos ese valor base.
             wrongHitsThreshold = (targetsPerColor / 2) + 1;
 
             wrongTargetsEliminated = 0;
             realTargetsEliminated = 0;
 
-            // 4. Iniciar Spawner con los colores asignados Y cantidades explícitas
-            // User requested: "cantidad de enemigos de cada color sea el mismo numero de la condicion de victoria"
-            // Pasamos targetsPerColor para CADA uno de los 3 tipos.
+            // 4. Iniciar Spawner
             spawner.SpawnWave(targetsPerColor, targetsPerColor, targetsPerColor,
-                              currentRealColor, currentDecoyColor, currentNeutralColor, spawnRate);
+                              currentRealType, currentDecoyType, currentNeutralType, spawnRate);
 
-            Debug.Log($"[DuckHunter] Oleada {currentWave}: Roles asignados. Real={currentRealColor}, Decoy={currentDecoyColor}, Neutral={currentNeutralColor}. Spawning {targetsPerColor} of each.");
+            // 5. Habilitar el apuntado del arma
+            if (playerGunAim != null) playerGunAim.SetAimEnabled(true);
+
+#if UNITY_EDITOR
+            Debug.Log($"[DuckHunter] Wave {currentWave}: Real={currentRealType}, Decoy={currentDecoyType}, Neutral={currentNeutralType}");
+#endif
         }
 
         private void SetupWaveRules()
         {
             // Sistema de asignación aleatoria:
-            // 1. Elegir un color al azar para ser el Real
-            // 2. De los 2 restantes, elegir uno al azar para ser el Decoy
-            // 3. El último es automáticamente Neutral
+            // 1. Elegir un tipo al azar para ser el Real
+            // 2. De los 2 restantes, elegir uno al azar para ser el Decoy (Trampa)
+            // 3. El último es Neutral
 
-            TargetColor[] allColors = { TargetColor.Green, TargetColor.Red, TargetColor.Blue };
+            EnemyType[] allTypes = { EnemyType.Duck, EnemyType.Balloon, EnemyType.Bird };
 
-            // Paso 1: Elegir color Real (índice 0, 1 o 2)
+            // Paso 1: Elegir Real
             int realIndex = Random.Range(0, 3);
-            currentRealColor = allColors[realIndex];
+            currentRealType = allTypes[realIndex];
 
-            // Paso 2: Obtener los 2 colores restantes
-            TargetColor[] remainingColors = new TargetColor[2];
+            // Paso 2: Obtener los 2 restantes
+            EnemyType[] remainingTypes = new EnemyType[2];
             int idx = 0;
             for (int i = 0; i < 3; i++)
             {
                 if (i != realIndex)
                 {
-                    remainingColors[idx] = allColors[i];
+                    remainingTypes[idx] = allTypes[i];
                     idx++;
                 }
             }
 
-            // Paso 3: De los restantes, elegir uno para Decoy
+            // Paso 3: Elegir Decoy
             int decoyIndex = Random.Range(0, 2);
-            currentDecoyColor = remainingColors[decoyIndex];
-            currentNeutralColor = remainingColors[1 - decoyIndex]; // El otro
+            currentDecoyType = remainingTypes[decoyIndex];
+            currentNeutralType = remainingTypes[1 - decoyIndex];
         }
 
-        public void RegisterHit(TargetColor hitColor, Vector3 hitPosition)
+        public void RegisterHit(EnemyType hitType, Vector3 hitPosition)
         {
             if (!isGameActive) return;
 
             // Determinar tipo para VFX
             TargetType typeHit = TargetType.Neutral;
-            if (hitColor == currentRealColor) typeHit = TargetType.Real;
-            else if (hitColor == currentDecoyColor) typeHit = TargetType.Decoy;
+            if (hitType == currentRealType) typeHit = TargetType.Real;
+            else if (hitType == currentDecoyType) typeHit = TargetType.Decoy;
 
             if (vfxController != null)
             {
                 vfxController.PlayHitVFX(hitPosition, typeHit);
             }
 
-            if (hitColor == currentRealColor)
+            if (hitType == currentRealType)
             {
                 realTargetsEliminated++;
-                ui.UpdateScore(realTargetsEliminated);
+                ui.UpdateScore();
 
                 // Condición de victoria de oleada
                 if (realTargetsEliminated >= targetsPerColor)
                 {
-                    Debug.Log($"[DuckHunter] Wave {currentWave} Complete! Spawning next wave...");
-
-                    // Esperar un momento antes de la siguiente oleada para dar feedback
+#if UNITY_EDITOR
+                    Debug.Log($"[DuckHunter] Wave {currentWave} Complete!");
+#endif
                     StartCoroutine(WaitAndNextWave());
                 }
             }
             else
             {
-                // Disparó a Decoy o Neutral
+                // Decoy/Neutral hit
                 wrongTargetsEliminated++;
-                Debug.LogWarning($"[DuckHunter] Error! Disparaste a {hitColor}. Llevas {wrongTargetsEliminated}/{wrongHitsThreshold}");
+#if UNITY_EDITOR
+                Debug.LogWarning($"[DuckHunter] Error hit on {hitType}. {wrongTargetsEliminated}/{wrongHitsThreshold}");
+#endif
 
                 if (wrongTargetsEliminated >= wrongHitsThreshold)
                 {
@@ -153,9 +158,33 @@ namespace GameJam.MiniGames.DuckHunter
 
         private System.Collections.IEnumerator WaitAndNextWave()
         {
+            // Deshabilitar apuntado durante la transición
+            if (playerGunAim != null) playerGunAim.SetAimEnabled(false);
+
+            // Limpiar objetivos restantes antes de la pausa
+            ClearActiveTargets();
+
             // Pausa breve para celebrar
-            yield return new WaitForSeconds(1.5f);
+            yield return waveEndDelay;
             StartNextWave();
+        }
+
+        private void ClearActiveTargets()
+        {
+            // Usamos FindObjectsByType si estamos >= Unity 2023, o FindObjectsOfType si <2023.
+            // Dado que en el código ya se usó FindFirstObjectByType, asumimos API nueva.
+#if UNITY_2023_1_OR_NEWER
+            DuckTarget[] activeTargets = FindObjectsByType<DuckTarget>(FindObjectsSortMode.None);
+#else
+            DuckTarget[] activeTargets = FindObjectsOfType<DuckTarget>();
+#endif
+            foreach (DuckTarget target in activeTargets)
+            {
+                if (target != null)
+                {
+                    Destroy(target.gameObject);
+                }
+            }
         }
 
         public void GameOver()
@@ -163,17 +192,42 @@ namespace GameJam.MiniGames.DuckHunter
             if (!isGameActive) return;
             isGameActive = false;
 
-            Debug.LogError("[DuckHunter] GAME OVER - NPC TRAP ACTIVATED on you!");
+#if UNITY_EDITOR
+            Debug.LogError("[DuckHunter] GAME OVER - NPC TRAP ACTIVATED!");
+#endif
             StopAllCoroutines(); // Detener spawner
 
+            // Deshabilitar apuntado
+            if (playerGunAim != null) playerGunAim.SetAimEnabled(false);
+
+            // Limpiar enemigos activos
+            ClearActiveTargets();
+
+            // Disparar secuencia dramática de Game Over
+            if (gunSequence != null)
+            {
+                gunSequence.TriggerGameOverSequence();
+            }
+            else
+            {
+                // Fallback: perder directamente si no hay secuencia configurada
+                HandleGameOverComplete();
+            }
+        }
+
+        public void HandleGameOverComplete()
+        {
+            // Este método será llamado por el evento de GameOverGunSequence
             if (controller != null)
             {
                 controller.LoseGame();
             }
+#if UNITY_EDITOR
             else
             {
-                Debug.LogError("[DuckHunter] MinigameController no asignado! No se puede ejecutar LoseGame().");
+                Debug.LogError("[DuckHunter] MinigameController missing!");
             }
+#endif
         }
     }
 }

@@ -137,7 +137,7 @@ public class Cup : MonoBehaviour
             float ease = Mathf.SmoothStep(0f, 1f, t);
 
             Vector3 pos = Vector3.Lerp(start, targetPos, ease);
-            pos += Vector3.up * Mathf.Sin(ease * Mathf.PI) * moveArcHeight;
+            pos += Vector3.up * (Mathf.Sin(ease * Mathf.PI) * moveArcHeight);
 
             transform.position = pos; // <-- aquí
             yield return null;

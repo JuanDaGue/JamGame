@@ -30,41 +30,43 @@ namespace GameJam.MiniGames.DuckHunter
             canvasGroup = GetComponent<CanvasGroup>();
             if (canvasGroup == null)
             {
-                Debug.LogError("[DuckHunterUI] No se encontró CanvasGroup. Agregándolo automáticamente.");
+#if UNITY_EDITOR
+                Debug.LogError("[DuckHunterUI] CanvasGroup missing. Auto-adding.");
+#endif
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
             }
         }
 
-        public void SetInstruction(TargetColor decoyColor)
+        public void SetInstruction(EnemyType decoyType)
         {
             if (instructionText != null)
             {
-                // Este es el mensaje MENTIROSO - La UI dice que dispares al color equivocado
-                string colorName = decoyColor switch
+                // Mensaje MENTIROSO (La UI dice el color incorrecto)
+                string name = decoyType switch
                 {
-                    TargetColor.Green => "VERDES",
-                    TargetColor.Red => "ROJOS",
-                    TargetColor.Blue => "AZULES",
+                    EnemyType.Duck => "PATOS",
+                    EnemyType.Balloon => "GLOBOS",
+                    EnemyType.Bird => "AVES",
                     _ => "OBJETIVOS"
                 };
 
-                instructionText.text = $"OBJETIVO: ELIMINA A LOS {colorName}";
+                instructionText.text = $"OBJETIVO: ELIMINA A LOS {name}";
             }
 
             if (targetIconDisplay != null)
             {
-                // Cambiar color del icono según el tipo mentiroso
-                targetIconDisplay.color = decoyColor switch
+                // Icono del tipo mentiroso
+                targetIconDisplay.color = decoyType switch
                 {
-                    TargetColor.Green => Color.green,
-                    TargetColor.Red => Color.red,
-                    TargetColor.Blue => Color.blue,
+                    EnemyType.Duck => Color.green,
+                    EnemyType.Balloon => Color.red,
+                    EnemyType.Bird => Color.blue,
                     _ => Color.white
                 };
             }
         }
 
-        public void UpdateScore(int score)
+        public void UpdateScore()
         {
             // Feedback opcional (podrías añadir un texto de puntuación aquí)
         }
