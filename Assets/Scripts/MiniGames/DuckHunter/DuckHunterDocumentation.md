@@ -15,7 +15,8 @@ Este documento detalla los scripts específicos del minijuego "Duck Hunter" (Tir
   * Controla la condición de Victoria (eliminar reales) y Derrota (eliminar demasiados inocentes/trampas).
 * **Configuración:**
   * `Total Waves`: Número de rondas.
-  * `Targets Per Wave`: Cantidad de enemigos por oleada.
+  * `Targets Per Color`: Cantidad de enemigos de CADA tipo (Real, Decoy, Neutral) por oleada.
+    * Ejemplo: Si es 5, spawnearán 5 Reales, 5 Trampas y 5 Neutrales (Total 15).
   * `Spawn Rate`: Velocidad de aparición.
 
 ### 2. DuckTarget.cs
@@ -27,6 +28,7 @@ Este documento detalla los scripts específicos del minijuego "Duck Hunter" (Tir
   * Controla el movimiento del objetivo (Lineal o ZigZag).
   * Almacena su identidad (`Real`, `Decoy`, `Neutral`).
   * Al recibir un disparo, notifica al Manager (`RegisterHit`).
+  * **Nota:** Ya no gestiona el color visual en tiempo de ejecución; confía en que el Prefab instanciado sea del color correcto.
 
 ---
 
@@ -39,9 +41,12 @@ Este documento detalla los scripts específicos del minijuego "Duck Hunter" (Tir
 * **Ubicación en Escena:** En un objeto Spawner (puede ser hijo del Manager).
 * **Propósito:**
   * Instancia los objetivos fuera de la pantalla.
-  * Asigna aleatoriamente propiedades iniciales (Tipo, Velocidad, Patrón de movimiento).
+  * Genera una lista exacta ("bolsa") con la cantidad requerida de cada color para garantizar el balance.
+  * Asigna aleatoriamente propiedades iniciales (Velocidad, Patrón de movimiento).
 * **Configuración:**
-  * `Target Prefab`: El objeto base a instanciar.
+  * `Green Target Prefab`: Prefab para objetivos Verdes.
+  * `Red Target Prefab`: Prefab para objetivos Rojos.
+  * `Blue Target Prefab`: Prefab para objetivos Azules.
   * `Spawn X/Y`: Límites del área de aparición.
 
 ---
