@@ -30,6 +30,8 @@ namespace GameJam.MiniGames.DuckHunter
         private EnemyType currentNeutralType;   // Error/Neutral
 
         private int wrongHitsThreshold = 3;
+        private readonly EnemyType[] allTypes = { EnemyType.Duck, EnemyType.Balloon, EnemyType.Bird };
+        private readonly EnemyType[] remainingTypes = new EnemyType[2];
 
         private bool isGameActive = false;
 
@@ -89,14 +91,11 @@ namespace GameJam.MiniGames.DuckHunter
             // 2. De los 2 restantes, elegir uno al azar para ser el Decoy (Trampa)
             // 3. El último es Neutral
 
-            EnemyType[] allTypes = { EnemyType.Duck, EnemyType.Balloon, EnemyType.Bird };
-
             // Paso 1: Elegir Real
             int realIndex = Random.Range(0, 3);
             currentRealType = allTypes[realIndex];
 
             // Paso 2: Obtener los 2 restantes
-            EnemyType[] remainingTypes = new EnemyType[2];
             int idx = 0;
             for (int i = 0; i < 3; i++)
             {
@@ -193,7 +192,7 @@ namespace GameJam.MiniGames.DuckHunter
             isGameActive = false;
 
 #if UNITY_EDITOR
-            Debug.LogError("[DuckHunter] GAME OVER - NPC TRAP ACTIVATED!");
+            Debug.Log("[DuckHunter] GAME OVER - NPC TRAP ACTIVATED!");
 #endif
             StopAllCoroutines(); // Detener spawner
 

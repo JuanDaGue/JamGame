@@ -14,6 +14,11 @@ namespace GameJam.MiniGames.DuckHunter
         [Tooltip("LayerMask para objetivos")]
         [SerializeField] private LayerMask targetLayer;
 
+        private void Start()
+        {
+            if (mainCamera == null) mainCamera = Camera.main;
+        }
+
         private void OnEnable()
         {
             if (shootAction != null)

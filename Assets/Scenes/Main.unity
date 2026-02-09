@@ -5050,22 +5050,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1236992126
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1340904833958525349}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 932247973805d9c40a80086bfa6c1388, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneName: JuanDScene
-  clickable: 1
-  buildIndexOverride: -1
-  highlightObject: {fileID: 0}
 --- !u!65 &1236992130
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14379,6 +14363,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8443527066713036430}
   - {fileID: 7981798411665686241}
   - {fileID: 1442472692942686336}
   - {fileID: 449430990585912111}
@@ -15498,7 +15483,6 @@ Transform:
   - {fileID: 6567748055885487578}
   - {fileID: 7420842246456068820}
   - {fileID: 3945330055764233969}
-  - {fileID: 8443527066713036430}
   - {fileID: 2892267968099042903}
   - {fileID: 6614996720413983031}
   - {fileID: 1528211361482757292}
@@ -24108,11 +24092,10 @@ GameObject:
   - component: {fileID: 8443527066713036430}
   - component: {fileID: 4106161859867141812}
   - component: {fileID: 6319797655696761381}
-  - component: {fileID: 1236992126}
   - component: {fileID: 1236992130}
   - component: {fileID: 1236992132}
   m_Layer: 7
-  m_Name: Cube.1143
+  m_Name: Stand_Ducks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

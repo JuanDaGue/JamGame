@@ -45,6 +45,12 @@ namespace GameJam.MiniGames.DuckHunter
         private DuckHunterManager manager;
         private bool initialized = false;
         private readonly WaitForSeconds flashDuration = new(0.05f);
+        private Renderer _renderer;
+
+        private void Awake()
+        {
+            _renderer = GetComponent<Renderer>();
+        }
 
         public void Initialize(EnemyType enemyType, float moveSpeed, DuckHunterManager gameManager, float minLimit, float maxLimit)
         {
@@ -159,12 +165,12 @@ namespace GameJam.MiniGames.DuckHunter
             }
 
             // 2. Flash visual (Blanco)
-            if (TryGetComponent(out Renderer r))
+            if (_renderer != null)
             {
                 // Usaremos Color blanco standard / Emission
-                r.material.color = Color.white;
-                r.material.EnableKeyword("_EMISSION");
-                r.material.SetColor("_EmissionColor", Color.white * 2f); // HDR Intensity
+                _renderer.material.color = Color.white;
+                _renderer.material.EnableKeyword("_EMISSION");
+                _renderer.material.SetColor("_EmissionColor", Color.white * 2f); // HDR Intensity
             }
 
             // 3. Esperar un frame o brevísimo tiempo par que se vea el flash

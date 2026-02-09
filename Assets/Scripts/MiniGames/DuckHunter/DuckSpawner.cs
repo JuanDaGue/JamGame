@@ -36,6 +36,8 @@ namespace GameJam.MiniGames.DuckHunter
         [Header("Velocidad Global")]
         [SerializeField] private Vector2 speedRange = new(3f, 6f);
 
+        private readonly System.Collections.Generic.List<EnemyType> waveComposition = new();
+
         public void SpawnWave(int duckCount, int balloonCount, int birdCount,
                               EnemyType realType, EnemyType decoyType, EnemyType neutralType, float rate)
         {
@@ -46,7 +48,7 @@ namespace GameJam.MiniGames.DuckHunter
                                          EnemyType realType, EnemyType decoyType, EnemyType neutralType, float rate)
         {
             // 1. Crear lista de objetivos
-            System.Collections.Generic.List<EnemyType> waveComposition = new();
+            waveComposition.Clear();
 
             for (int i = 0; i < duckCount; i++) waveComposition.Add(EnemyType.Duck);
             for (int i = 0; i < balloonCount; i++) waveComposition.Add(EnemyType.Balloon);
