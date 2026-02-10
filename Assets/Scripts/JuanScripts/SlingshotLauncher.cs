@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(LineRenderer))]
 public class SlingshotLauncher : MonoBehaviour
@@ -6,12 +7,13 @@ public class SlingshotLauncher : MonoBehaviour
     [Header("Refs")]
     [SerializeField] private Transform firePoint;
     [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Image chargeBar; // referencia a la UI Image
 
     [Header("Tuning")]
-    [SerializeField] private float maxPower = 50f;       // Potencia máxima
-    [SerializeField] private float chargeTime = 3f;      // Tiempo máximo de carga en segundos
-    [SerializeField] private int trajectoryPoints = 30;  // cantidad de puntos para dibujar la trayectoria
-    [SerializeField] private float timeStep = 0.1f;      // intervalo de simulación
+    [SerializeField] private float maxPower = 50f;
+    [SerializeField] private float chargeTime = 3f;
+    [SerializeField] private int trajectoryPoints = 30;
+    [SerializeField] private float timeStep = 0.1f;
 
     private bool charging;
     private float currentCharge;
@@ -23,6 +25,7 @@ public class SlingshotLauncher : MonoBehaviour
     {
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.positionCount = 0;
+        if (chargeBar != null) chargeBar.fillAmount = 0f;
     }
 
     void Update()
@@ -39,7 +42,11 @@ public class SlingshotLauncher : MonoBehaviour
             float elapsed = Time.time - chargeStartTime;
             currentCharge = Mathf.Clamp((elapsed / chargeTime) * maxPower, 0f, maxPower);
 
-            // Dibujar trayectoria mientras se carga
+            // Actualizar barra de carga
+            if (chargeBar != null)
+                chargeBar.fillAmount = currentCharge / maxPower;
+
+            // Dibujar trayectoria
             Vector3 dir = (Camera.main.transform.forward + Camera.main.transform.up * 0.3f).normalized;
             ShowTrajectory(firePoint.position, dir * currentCharge);
 
@@ -48,6 +55,7 @@ public class SlingshotLauncher : MonoBehaviour
                 charging = false;
                 Fire(dir, currentCharge);
                 ClearTrajectory();
+                if (chargeBar != null) chargeBar.fillAmount = 0f;
             }
         }
 
@@ -57,6 +65,7 @@ public class SlingshotLauncher : MonoBehaviour
             Vector3 dir = (Camera.main.transform.forward + Camera.main.transform.up * 0.3f).normalized;
             Fire(dir, currentCharge);
             ClearTrajectory();
+            if (chargeBar != null) chargeBar.fillAmount = 0f;
         }
     }
 

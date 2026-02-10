@@ -77,7 +77,7 @@ AnimatorStateTransition:
   m_TransitionOffset: 0
   m_ExitTime: 0.05093004
   m_HasExitTime: 0
-  m_HasFixedDuration: 1
+  m_HasFixedDuration: 0
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
@@ -114,7 +114,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Idle
-  m_Speed: 1
+  m_Speed: 0.5
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 2129841831820664254}
@@ -128,7 +128,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: ed7bc18efd2fb784c803015d01806ef8, type: 3}
+  m_Motion: {fileID: -887982601649841707, guid: f3499df6fa9e0844299630d344d35235, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

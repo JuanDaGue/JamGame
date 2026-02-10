@@ -2903,9 +2903,9 @@ MonoBehaviour:
   gameOverPanel: {fileID: 933795457}
   victoryPanel: {fileID: 1470210643}
   optionsPanel: {fileID: 856570257}
-  playButton: {fileID: 1183165553}
+  playButton: {fileID: 157697424}
   optionsButton: {fileID: 443762990}
-  exitButton: {fileID: 157697424}
+  exitButton: {fileID: 1183165553}
   masterVolumeSlider: {fileID: 252675349}
   musicVolumeSlider: {fileID: 917989583}
   vfxVolumeSlider: {fileID: 1321185181}
