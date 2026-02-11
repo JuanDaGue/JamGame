@@ -9,6 +9,7 @@ public class HighStrikerManager : MonoBehaviour
     [Header("Referencias Generales")]
     public Animator animatorMartillo;
     public Animator animatorBarra;
+    public Animator animatorCarro;
 
     [Header("UI Referencias")]
     public Slider sliderFuerza;
@@ -271,7 +272,10 @@ public class HighStrikerManager : MonoBehaviour
             textoCentral.text = "¡EXCESO DE FUERZA!";
 
             animatorMartillo.SetTrigger("TriggerAccidente");
-            animatorBarra.SetTrigger("TriggerGolpe");
+            animatorBarra.SetTrigger("TriggerGolpeFuerte");
+
+            animatorCarro.SetTrigger("TriggerRun");
+
             return;
         }
 
@@ -282,7 +286,7 @@ public class HighStrikerManager : MonoBehaviour
             textoCentral.text = "¡Muy Débil!";
 
             animatorMartillo.SetTrigger("TriggerDebil");
-            animatorBarra.SetTrigger("TriggerGolpe");
+            animatorBarra.SetTrigger("TriggerGolpeDebil");
         }
         else if (clicksActuales > rangoMaximoVictoria)
         {
@@ -290,7 +294,9 @@ public class HighStrikerManager : MonoBehaviour
             textoCentral.text = "¡EXCESO DE FUERZA!";
 
             animatorMartillo.SetTrigger("TriggerAccidente");
-            animatorBarra.SetTrigger("TriggerGolpe");
+            animatorBarra.SetTrigger("TriggerGolpeFuerte");
+
+            animatorCarro.SetTrigger("TriggerRun");
         }
         else
         {
@@ -298,7 +304,7 @@ public class HighStrikerManager : MonoBehaviour
             textoCentral.text = "¡GANASTE!";
 
             animatorMartillo.SetTrigger("TriggerVictoria");
-            animatorBarra.SetTrigger("TriggerGolpe");
+            animatorBarra.SetTrigger("TriggerGolpeExacto");
         }
 
         Invoke("ReiniciarJuego", tiempoParaReiniciar);
