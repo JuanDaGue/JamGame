@@ -3,50 +3,113 @@ using System.Collections;
 using GameJam.MiniGames;
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class EnemyStateController : MonoBehaviour
 {
     public enum EnemyState { Waiting, Angry, Dead, Attack }
     public event Action OnAttack;
 
     [Header("Refs")]
-    [SerializeField] private Animator animator; // opcional
+    [SerializeField] private Animator animator;
 
     [Header("State")]
     [SerializeField] private EnemyState state = EnemyState.Waiting;
     public EnemyState State => state;
-    public MinigameController minigameController; // referencia al minijuego asociado
+
+    public MinigameController minigameController;
     public bool isInWater { get; private set; }
 
     [Header("Attack Timing")]
-    [SerializeField] private float timeToAttack = 15f; // segundos para pasar de Angry a Attack
+    [SerializeField] private float timeToAttack = 15f;
     private float angryStartTime;
+
+    [Header("Triggers")]
     public TargetHitTrigger targetTrigger;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip idleLoop;
+    [SerializeField] private AudioClip angryClip;
+    [SerializeField] private AudioClip attackClip;
+    [SerializeField] private AudioClip fallingClip;
+    [SerializeField] private AudioClip deathClip;
+    [SerializeField] private float audioVolume = 0.8f;
+
+    [SerializeField] private AudioSource audioSource;
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 1f; // sonido 3D
+
         EnterWaiting();
-        if(minigameController == null)
-        {
+
+        if (minigameController == null)
             minigameController = FindFirstObjectByType<MinigameController>();
-        }
-        if(animator == null)
-        {
+
+        if (animator == null)
             animator = GetComponent<Animator>();
-        }
+
         animator.SetBool("IsInIdle", true);
         animator.SetBool("IsWalking", false);
-        targetTrigger.OnHit += FallingTriggeredAnimtion;
+
+        if (targetTrigger != null)
+            targetTrigger.OnHit += FallingTriggeredAnimtion;
     }
 
-    private void FallingTriggeredAnimtion()
+    private void OnDisable()
     {
-        animator.SetTrigger("Falling");
-        targetTrigger.OnHit -= FallingTriggeredAnimtion;
+        if (targetTrigger != null)
+            targetTrigger.OnHit -= FallingTriggeredAnimtion;
     }
-    void OnDisable()
+
+    // ================= STATES =================
+
+    void EnterWaiting()
     {
-        targetTrigger.OnHit -= FallingTriggeredAnimtion;
+        state = EnemyState.Waiting;
+        animator?.SetBool("IsInIdle", true);
+        PlayLoop(idleLoop);
     }
+
+    void EnterAngry()
+    {
+        if (state == EnemyState.Angry) return;
+
+        state = EnemyState.Angry;
+        angryStartTime = Time.time;
+
+        animator?.SetTrigger("Angry");
+        PlayOneShot(angryClip);
+    }
+
+    void EnterAttack()
+    {
+        if (state != EnemyState.Angry) return;
+
+        state = EnemyState.Attack;
+        animator?.SetTrigger("Attack");
+
+        PlayOneShot(attackClip);
+        OnAttack?.Invoke();
+
+        StartCoroutine(WaitAndDie(3f, false));
+    }
+
+    void EnterDead()
+    {
+        if (state == EnemyState.Dead) return;
+
+        state = EnemyState.Dead;
+
+        StopLoop();
+        PlayOneShot(deathClip);
+
+        StartCoroutine(WaitAndDie(3f, true));
+        Debug.Log("Enemy murió electrocutado.");
+    }
+
+    // ================= EVENTS =================
 
     public void SetInWaterByTrigger(bool inWater)
     {
@@ -59,34 +122,22 @@ public class EnemyStateController : MonoBehaviour
 
     public void ElectrocuteAndDie()
     {
-        if (state == EnemyState.Dead) return;
         EnterDead();
     }
 
-    void EnterWaiting()
+    private void FallingTriggeredAnimtion()
     {
-        state = EnemyState.Waiting;
-        if (animator != null)
-        {
-            animator.SetBool("IsInIdle", true);
-        }
+        animator?.SetTrigger("Falling");
+        PlayOneShot(fallingClip);
+
+        if (targetTrigger != null)
+            targetTrigger.OnHit -= FallingTriggeredAnimtion;
     }
 
-    void EnterAngry()
-    {
-        if (state == EnemyState.Angry) return;
-        state = EnemyState.Angry;
-        angryStartTime = Time.time; // guardar el momento en que entró a Angry
-
-        if (animator != null)
-        {
-            animator.SetTrigger("Angry");
-        }
-    }
+    // ================= UPDATE =================
 
     void Update()
     {
-        // Solo si está Angry y no Dead, comprobar si ya pasaron los segundos
         if (state == EnemyState.Angry)
         {
             if (Time.time - angryStartTime >= timeToAttack)
@@ -96,43 +147,39 @@ public class EnemyStateController : MonoBehaviour
         }
     }
 
-    void EnterDead()
+    // ================= AUDIO =================
+
+    private void PlayOneShot(AudioClip clip)
     {
-        state = EnemyState.Dead;
-        // if (animator != null)
-        // {
-        //     animator.Play("Death");
-        // }
-        StartCoroutine(WaitAndDie(3f,true)); // esperar 2 segundos antes de llamar a WinGame
-        Debug.Log("Enemy murió electrocutado.");
+        if (clip == null) return;
+        audioSource.PlayOneShot(clip, audioVolume);
     }
 
-    void EnterAttack()
+    private void PlayLoop(AudioClip clip)
     {
-        // Solo puede entrar a Attack si sigue en Angry
-        if (state != EnemyState.Angry) return;
+        if (clip == null) return;
 
-        state = EnemyState.Attack;
-        if (animator != null)
-        {
-            animator.SetTrigger("Attack");
-        }
-
-        OnAttack?.Invoke(); // Invocar el evento de ataque
-        //GameManager.Instance?.GameOver();
-        StartCoroutine(WaitAndDie(3f,false)); // esperar 3 segundos antes de llamar a LoseGame
-        Debug.Log("Enemy cambió de Angry a Attack después de 15s.");
+        audioSource.clip = clip;
+        audioSource.loop = true;
+        audioSource.volume = audioVolume;
+        audioSource.Play();
     }
-    IEnumerator WaitAndDie(float delay, bool won = false)
+
+    private void StopLoop()
+    {
+        audioSource.Stop();
+        audioSource.clip = null;
+    }
+
+    // ================= END =================
+
+    IEnumerator WaitAndDie(float delay, bool won)
     {
         yield return new WaitForSeconds(delay);
+
         if (won)
-        {
             minigameController?.WinGame();
-        }
         else
-        {
             minigameController?.LoseGame();
-        }
     }
 }

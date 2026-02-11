@@ -38,8 +38,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private SoundSettings soundSettings = new SoundSettings();
 
     // Audio sources
-    private AudioSource _musicSource;
-    private AudioSource _vfxSource;
+    [SerializeField]private AudioSource _musicSource;
+    [SerializeField]private AudioSource _vfxSource;
 
     // Audio clips (asignar en el inspector)
     [Header("Audio Clips")]
@@ -72,30 +72,12 @@ public class GameManager : MonoBehaviour
         // Initialize model
         _model = new GameModel();
         
-        // Setup audio sources
-        SetupAudioSources();
+
         
         // Set initial state
         ChangeState(GameState.InMenu);
     }
 
-    private void SetupAudioSources()
-    {
-        // Create music audio source
-        GameObject musicObj = new GameObject("MusicSource");
-        musicObj.transform.parent = transform;
-        _musicSource = musicObj.AddComponent<AudioSource>();
-        _musicSource.loop = true;
-        _musicSource.playOnAwake = false;
-        
-        // Create VFX audio source
-        GameObject vfxObj = new GameObject("VFXSource");
-        vfxObj.transform.parent = transform;
-        _vfxSource = vfxObj.AddComponent<AudioSource>();
-        _vfxSource.playOnAwake = false;
-        
-        UpdateAudioVolumes();
-    }
 
     public void ChangeState(GameState newState)
     {

@@ -65,7 +65,7 @@ namespace GameJam.MiniGames
                 // if (GameManager.Instance != null) GameManager.Instance.Victory();
                 // Pero como no quiero romper si no está en esta escena, lo dejo opcional abajo:
             }
-
+            LightManager.Instance.DarkenDay();  
             // 3) Volver al Hub
             ReturnToHub();
         }
