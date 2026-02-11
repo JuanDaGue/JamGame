@@ -7,14 +7,15 @@ using System.Collections;
 public class HighStrikerManager : MonoBehaviour
 {
     [Header("Referencias Generales")]
-    public Animator animatorJuego;
+    public Animator animatorMartillo;
+    public Animator animatorBarra;
 
     [Header("UI Referencias")]
     public Slider sliderFuerza;
     public TextMeshProUGUI textoCentral;
 
-    public RectTransform contenedorMouse; // El PADRE (Marco)
-    public TextMeshProUGUI contadorMouse; // El HIJO (Texto)
+    public RectTransform contenedorMouse;
+    public TextMeshProUGUI contadorMouse;
 
     [Header("UI Tiempo")]
     public GameObject objetoTituloTiempo;
@@ -23,6 +24,7 @@ public class HighStrikerManager : MonoBehaviour
     [Header("Dificultad y Meta")]
     public float tiempoLimite = 5.0f;
     public int clicksMeta = 50;
+    public int tiempoParaReiniciar = 7;
 
     [Header("Ajustes de Seguridad")]
     public int capacidadMaximaBarra = 80;
@@ -32,6 +34,7 @@ public class HighStrikerManager : MonoBehaviour
     public int tolerancia = 5;
 
     [Header("Configuración de Pereza")]
+    [Range(0.1f, 1.0f)]
     public float tiempoMaxSinClick = 0.3f;
     public float periodoDeGracia = 1.0f;
     public float duracionMensajeYa = 1.0f;
@@ -70,7 +73,6 @@ public class HighStrikerManager : MonoBehaviour
         textoCentral.text = "Click para Iniciar";
         contadorMouse.text = "";
 
-        // --- CAMBIO: Nos aseguramos de que empiece oculto por estética ---
         if (contenedorMouse != null)
             contenedorMouse.gameObject.SetActive(false);
 
@@ -106,7 +108,6 @@ public class HighStrikerManager : MonoBehaviour
         {
             Vector2 mousePos = controls.Gameplay.Point.ReadValue<Vector2>();
 
-            // Movemos el contenedor (el texto hijo lo seguirá)
             if (contenedorMouse != null)
             {
                 contenedorMouse.position = mousePos + new Vector2(50, 50);
@@ -122,7 +123,7 @@ public class HighStrikerManager : MonoBehaviour
     {
         estadoActual = EstadoJuego.Countdown;
 
-        if (animatorJuego != null) animatorJuego.SetTrigger("TriggerPreparado");
+        if (animatorMartillo != null) animatorMartillo.SetTrigger("TriggerPreparado");
 
         textoCentral.text = "3";
         yield return new WaitForSeconds(1);
@@ -148,7 +149,6 @@ public class HighStrikerManager : MonoBehaviour
         juegoActivo = true;
         periodoGraciaActivo = true;
 
-        // --- CAMBIO: Activamos el contenedor visual ahora que empieza el juego ---
         if (contenedorMouse != null)
             contenedorMouse.gameObject.SetActive(true);
 
@@ -225,8 +225,7 @@ public class HighStrikerManager : MonoBehaviour
                     contadorMouse.text = "0";
                     momentoUltimoClick = Time.time;
 
-                    // TODO: ANIMACION 
-                    // if(animatorJuego != null) animatorJuego.SetTrigger("TriggerReset");
+                    if (animatorMartillo != null) animatorMartillo.SetTrigger("TriggerStumble");
                 }
             }
         }
@@ -255,7 +254,6 @@ public class HighStrikerManager : MonoBehaviour
         estadoActual = EstadoJuego.Finished;
         textoCentral.text = "";
 
-        // --- CAMBIO: Ocultamos el contenedor al terminar para limpiar la pantalla ---
         if (contenedorMouse != null)
             contenedorMouse.gameObject.SetActive(false);
 
@@ -267,21 +265,13 @@ public class HighStrikerManager : MonoBehaviour
 
         Debug.Log($"Meta: {clicksMeta}, Rango Victoria: {rangoMinimoVictoria} - {rangoMaximoVictoria}");
 
-        // TODO: ANIMACION 
-        /*
-        if (animatorJuego == null) 
-        {
-            Debug.LogError("¡Falta asignar el Animator en el Inspector!");
-            return;
-        }
-        */
-
         if (descarrileActivo)
         {
             Debug.Log("RESULTADO FINAL: Accidente (Sobrecarga detectada)");
             textoCentral.text = "¡EXCESO DE FUERZA!";
-            // TODO: ANIMACION
-            // animatorJuego.SetTrigger("TriggerAccidente");
+
+            animatorMartillo.SetTrigger("TriggerAccidente");
+            animatorBarra.SetTrigger("TriggerGolpe");
             return;
         }
 
@@ -290,26 +280,28 @@ public class HighStrikerManager : MonoBehaviour
         {
             Debug.Log("RESULTADO FINAL: Muy Débil");
             textoCentral.text = "¡Muy Débil!";
-            // TODO: ANIMACION
-            // animatorJuego.SetTrigger("TriggerDebil");
+
+            animatorMartillo.SetTrigger("TriggerDebil");
+            animatorBarra.SetTrigger("TriggerGolpe");
         }
         else if (clicksActuales > rangoMaximoVictoria)
         {
             Debug.Log("RESULTADO FINAL: Accidente (Exceso Manual)");
             textoCentral.text = "¡EXCESO DE FUERZA!";
-            // TODO: ANIMACION
-            // animatorJuego.SetTrigger("TriggerAccidente");
+
+            animatorMartillo.SetTrigger("TriggerAccidente");
+            animatorBarra.SetTrigger("TriggerGolpe");
         }
         else
         {
             Debug.Log("RESULTADO FINAL: Victoria");
             textoCentral.text = "¡GANASTE!";
-            // TODO: ANIMACION
-            // animatorJuego.SetTrigger("TriggerVictoria");
+
+            animatorMartillo.SetTrigger("TriggerVictoria");
+            animatorBarra.SetTrigger("TriggerGolpe");
         }
 
-        //Reset del juego tras unos segundos
-        Invoke("ReiniciarJuego", 3.0f);
+        Invoke("ReiniciarJuego", tiempoParaReiniciar);
     }
 
     void ReiniciarJuego()
@@ -325,5 +317,7 @@ public class HighStrikerManager : MonoBehaviour
             textoTiempo.text = tiempoLimite.ToString("F1") + "s";
 
         sliderFuerza.value = 0;
+
+        animatorMartillo.SetTrigger("TriggerReset");
     }
 }
