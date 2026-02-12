@@ -1,8 +1,7 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using System.Collections;
-// using UnityEngine.InputSystem; 
 
 public class HighStrikerManager : MonoBehaviour
 {
@@ -10,10 +9,14 @@ public class HighStrikerManager : MonoBehaviour
     public Animator animatorMartillo;
     public Animator animatorBarra;
     public Animator animatorCarro;
+    public VolumeModifier volumeModifier;
 
     [Header("UI Referencias")]
+    public Button botonDeInicio;
     public Slider sliderFuerza;
     public TextMeshProUGUI textoCentral;
+    public Image botonVolver;
+
 
     public RectTransform contenedorMouse;
     public TextMeshProUGUI contadorMouse;
@@ -30,7 +33,7 @@ public class HighStrikerManager : MonoBehaviour
     [Header("Ajustes de Seguridad")]
     public int capacidadMaximaBarra = 80;
 
-    [Tooltip("Margen de error. Se ajusta con slider para evitar valores exagerados.")]
+    [Tooltip("Margen de error.")]
     [Range(0, 10)]
     public int tolerancia = 5;
 
@@ -47,6 +50,7 @@ public class HighStrikerManager : MonoBehaviour
     private bool juegoActivo = false;
     private bool periodoGraciaActivo = false;
     private bool descarrileActivo = false;
+    private bool accidenteOcurrido = false;
 
     private HighStriker_InputActions controls;
 
@@ -71,7 +75,8 @@ public class HighStrikerManager : MonoBehaviour
     void Start()
     {
         estadoActual = EstadoJuego.Idle;
-        textoCentral.text = "Click para Iniciar";
+
+        textoCentral.text = "Click para iniciar";
         contadorMouse.text = "";
 
         if (contenedorMouse != null)
@@ -87,6 +92,10 @@ public class HighStrikerManager : MonoBehaviour
         sliderFuerza.minValue = 0;
         sliderFuerza.maxValue = capacidadMaximaBarra;
         sliderFuerza.value = 0;
+
+        botonVolver.enabled = true;
+
+        if (botonDeInicio != null) botonDeInicio.enabled = true;
     }
 
     void Update()
@@ -94,10 +103,6 @@ public class HighStrikerManager : MonoBehaviour
         switch (estadoActual)
         {
             case EstadoJuego.Idle:
-                if (controls.Gameplay.Fire.triggered)
-                {
-                    StartCoroutine(RutinaCuentaRegresiva());
-                }
                 break;
 
             case EstadoJuego.Playing:
@@ -120,9 +125,21 @@ public class HighStrikerManager : MonoBehaviour
         }
     }
 
+    public void IniciarSecuencia()
+    {
+        if (estadoActual == EstadoJuego.Idle)
+        {
+            // Ocultamos el botón de inicio para que no moleste
+            if (botonDeInicio != null) botonDeInicio.enabled = false;
+
+            StartCoroutine(RutinaCuentaRegresiva());
+        }
+    }
+
     IEnumerator RutinaCuentaRegresiva()
     {
         estadoActual = EstadoJuego.Countdown;
+        botonVolver.enabled = false;
 
         if (animatorMartillo != null) animatorMartillo.SetTrigger("TriggerPreparado");
 
@@ -190,7 +207,6 @@ public class HighStrikerManager : MonoBehaviour
             return;
         }
 
-        // --- INPUT ---
         if (controls.Gameplay.Fire.triggered)
         {
             clicksActuales++;
@@ -258,45 +274,30 @@ public class HighStrikerManager : MonoBehaviour
         if (contenedorMouse != null)
             contenedorMouse.gameObject.SetActive(false);
 
-        CancelInvoke("BorrarTextoCentral");
-        StopAllCoroutines();
+        CancelInvoke(nameof(BorrarTextoCentral));
 
         int rangoMinimoVictoria = Mathf.Clamp(clicksMeta - tolerancia, 0, capacidadMaximaBarra);
         int rangoMaximoVictoria = Mathf.Clamp(clicksMeta + tolerancia, 0, capacidadMaximaBarra);
 
         Debug.Log($"Meta: {clicksMeta}, Rango Victoria: {rangoMinimoVictoria} - {rangoMaximoVictoria}");
 
-        if (descarrileActivo)
+        if (clicksActuales > rangoMaximoVictoria)
         {
-            Debug.Log("RESULTADO FINAL: Accidente (Sobrecarga detectada)");
+            Debug.Log("RESULTADO FINAL: Accidente (Exceso de Fuerza)");
             textoCentral.text = "¡EXCESO DE FUERZA!";
 
             animatorMartillo.SetTrigger("TriggerAccidente");
             animatorBarra.SetTrigger("TriggerGolpeFuerte");
-
             animatorCarro.SetTrigger("TriggerRun");
 
-            return;
+            accidenteOcurrido = true;
         }
-
-        // Evaluación Normal
-        if (clicksActuales < rangoMinimoVictoria)
+        else if (clicksActuales < rangoMinimoVictoria)
         {
             Debug.Log("RESULTADO FINAL: Muy Débil");
             textoCentral.text = "¡Muy Débil!";
 
             animatorMartillo.SetTrigger("TriggerDebil");
-            animatorBarra.SetTrigger("TriggerGolpeDebil");
-        }
-        else if (clicksActuales > rangoMaximoVictoria)
-        {
-            Debug.Log("RESULTADO FINAL: Accidente (Exceso Manual)");
-            textoCentral.text = "¡EXCESO DE FUERZA!";
-
-            animatorMartillo.SetTrigger("TriggerAccidente");
-            animatorBarra.SetTrigger("TriggerGolpeFuerte");
-
-            animatorCarro.SetTrigger("TriggerRun");
         }
         else
         {
@@ -305,15 +306,26 @@ public class HighStrikerManager : MonoBehaviour
 
             animatorMartillo.SetTrigger("TriggerVictoria");
             animatorBarra.SetTrigger("TriggerGolpeExacto");
+
+            Invoke(nameof(ReiniciarJuego), tiempoParaReiniciar + 2f);
+            return;
         }
 
-        Invoke("ReiniciarJuego", tiempoParaReiniciar);
+        Invoke(nameof(ReiniciarJuego), tiempoParaReiniciar);
     }
 
     void ReiniciarJuego()
     {
         estadoActual = EstadoJuego.Idle;
-        textoCentral.text = "Click para Iniciar";
+
+        if (accidenteOcurrido && volumeModifier != null)
+        {
+            volumeModifier.ResetEfecto();
+            animatorCarro.SetTrigger("TriggerReset");
+            accidenteOcurrido = false;
+        }
+
+        textoCentral.text = "Click para iniciar";
         contadorMouse.text = "";
 
         if (objetoTituloTiempo != null)
@@ -325,5 +337,10 @@ public class HighStrikerManager : MonoBehaviour
         sliderFuerza.value = 0;
 
         animatorMartillo.SetTrigger("TriggerReset");
+        animatorBarra.SetTrigger("TriggerReset");
+
+        botonVolver.enabled = true;
+
+        if (botonDeInicio != null) botonDeInicio.enabled = true;
     }
 }
