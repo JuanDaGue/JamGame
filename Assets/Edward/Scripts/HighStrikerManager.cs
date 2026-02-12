@@ -10,6 +10,7 @@ public class HighStrikerManager : MonoBehaviour
     public Animator animatorBarra;
     public Animator animatorCarro;
     public VolumeModifier volumeModifier;
+    public CinemaCameraController cinemaCameraController;
 
     [Header("UI Referencias")]
     public Button botonDeInicio;
@@ -323,6 +324,7 @@ public class HighStrikerManager : MonoBehaviour
             volumeModifier.ResetEfecto();
             animatorCarro.SetTrigger("TriggerReset");
             accidenteOcurrido = false;
+            cinemaCameraController.ReproducirHaciaElInicio(0);
         }
 
         textoCentral.text = "Click para iniciar";
