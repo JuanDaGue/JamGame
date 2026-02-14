@@ -5,26 +5,30 @@ using System.Collections;
 
 public class HighStrikerManager : MonoBehaviour
 {
-    [Header("Referencias Generales")]
+    [Header("Referencias de Animadores")]
     public Animator animatorMartillo;
     public Animator animatorBarra;
     public Animator animatorCarro;
+
+    [Header("Referencias de Efectos")]
     public VolumeModifier volumeModifier;
+
+    [Header("Referencias de Cinemática")]
     public CinemaCameraController cinemaCameraController;
 
-    [Header("UI Referencias")]
+    [Header("Referencias de UI")]
     public Button botonDeInicio;
     public Slider sliderFuerza;
     public TextMeshProUGUI textoCentral;
     public Image botonVolver;
-
-
     public RectTransform contenedorMouse;
     public TextMeshProUGUI contadorMouse;
-
-    [Header("UI Tiempo")]
     public GameObject objetoTituloTiempo;
     public TextMeshProUGUI textoTiempo;
+
+    [Header("Referencias de UIAnimations")]
+    public GameObject SliderObject;
+    public GameObject TextoCentralObject;
 
     [Header("Dificultad y Meta")]
     public float tiempoLimite = 5.0f;
@@ -32,6 +36,7 @@ public class HighStrikerManager : MonoBehaviour
     public int tiempoParaReiniciar = 7;
 
     [Header("Ajustes de Seguridad")]
+    public float tiempoParaIniciar = 3.5f;
     public int capacidadMaximaBarra = 80;
 
     [Tooltip("Margen de error.")]
@@ -52,6 +57,8 @@ public class HighStrikerManager : MonoBehaviour
     private bool periodoGraciaActivo = false;
     private bool descarrileActivo = false;
     private bool accidenteOcurrido = false;
+    private bool victoriaObtenida = false;
+    private bool golpeDebilOcurrido = false;
 
     private HighStriker_InputActions controls;
 
@@ -73,8 +80,10 @@ public class HighStrikerManager : MonoBehaviour
         controls.Gameplay.Disable();
     }
 
-    void Start()
+    IEnumerator Start()
     {
+        yield return new WaitForSeconds(tiempoParaIniciar);
+
         estadoActual = EstadoJuego.Idle;
 
         textoCentral.text = "Click para iniciar";
@@ -86,9 +95,6 @@ public class HighStrikerManager : MonoBehaviour
         if (objetoTituloTiempo != null)
             objetoTituloTiempo.SetActive(false);
 
-        if (textoTiempo != null)
-            textoTiempo.text = tiempoLimite.ToString("F1") + "s";
-
         sliderFuerza.wholeNumbers = true;
         sliderFuerza.minValue = 0;
         sliderFuerza.maxValue = capacidadMaximaBarra;
@@ -97,6 +103,9 @@ public class HighStrikerManager : MonoBehaviour
         botonVolver.enabled = true;
 
         if (botonDeInicio != null) botonDeInicio.enabled = true;
+
+        if (SliderObject != null) UIAnimationHelper.Instance.PlayPopAnimation(SliderObject, 0.5f, Vector3.one * 4, 1.2f);
+        if (TextoCentralObject != null) UIAnimationHelper.Instance.PlayPopAnimation(TextoCentralObject, 0.5f, Vector3.one, 1.2f);
     }
 
     void Update()
@@ -130,15 +139,15 @@ public class HighStrikerManager : MonoBehaviour
     {
         if (estadoActual == EstadoJuego.Idle)
         {
-            // Ocultamos el botón de inicio para que no moleste
             if (botonDeInicio != null) botonDeInicio.enabled = false;
-
             StartCoroutine(RutinaCuentaRegresiva());
         }
     }
 
     IEnumerator RutinaCuentaRegresiva()
     {
+        cinemaCameraController.ReproducirHaciaElFinal(0);
+
         estadoActual = EstadoJuego.Countdown;
         botonVolver.enabled = false;
 
@@ -230,7 +239,6 @@ public class HighStrikerManager : MonoBehaviour
             }
         }
 
-        // --- PEREZA ---
         if (!periodoGraciaActivo)
         {
             if (Time.time - momentoUltimoClick > tiempoMaxSinClick)
@@ -280,34 +288,29 @@ public class HighStrikerManager : MonoBehaviour
         int rangoMinimoVictoria = Mathf.Clamp(clicksMeta - tolerancia, 0, capacidadMaximaBarra);
         int rangoMaximoVictoria = Mathf.Clamp(clicksMeta + tolerancia, 0, capacidadMaximaBarra);
 
-        Debug.Log($"Meta: {clicksMeta}, Rango Victoria: {rangoMinimoVictoria} - {rangoMaximoVictoria}");
-
         if (clicksActuales > rangoMaximoVictoria)
         {
-            Debug.Log("RESULTADO FINAL: Accidente (Exceso de Fuerza)");
-            textoCentral.text = "¡EXCESO DE FUERZA!";
+            accidenteOcurrido = true;
 
+            textoCentral.text = "¡EXCESO DE FUERZA!";
             animatorMartillo.SetTrigger("TriggerAccidente");
             animatorBarra.SetTrigger("TriggerGolpeFuerte");
             animatorCarro.SetTrigger("TriggerRun");
-
-            accidenteOcurrido = true;
         }
         else if (clicksActuales < rangoMinimoVictoria)
         {
-            Debug.Log("RESULTADO FINAL: Muy Débil");
-            textoCentral.text = "¡Muy Débil!";
+            golpeDebilOcurrido = true;
 
+            textoCentral.text = "¡Muy Débil!";
             animatorMartillo.SetTrigger("TriggerDebil");
         }
         else
         {
-            Debug.Log("RESULTADO FINAL: Victoria");
-            textoCentral.text = "¡GANASTE!";
+            victoriaObtenida = true;
 
+            textoCentral.text = "¡GANASTE!";
             animatorMartillo.SetTrigger("TriggerVictoria");
             animatorBarra.SetTrigger("TriggerGolpeExacto");
-
             Invoke(nameof(ReiniciarJuego), tiempoParaReiniciar + 2f);
             return;
         }
@@ -324,6 +327,14 @@ public class HighStrikerManager : MonoBehaviour
             volumeModifier.ResetEfecto();
             animatorCarro.SetTrigger("TriggerReset");
             accidenteOcurrido = false;
+            cinemaCameraController.ReproducirHaciaElInicio(3);
+        }
+        else if (victoriaObtenida)
+        {
+            cinemaCameraController.ReproducirHaciaElFinal(4);
+        }
+        else if (golpeDebilOcurrido)
+        {
             cinemaCameraController.ReproducirHaciaElInicio(0);
         }
 

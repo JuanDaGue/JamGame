@@ -19,6 +19,7 @@ public class CinemaCameraController : MonoBehaviour
     }
 
     [Header("Referencias")]
+    public GameObject CinemachineCamera;
     public CinemachineSplineDolly splineDolly;
     public CinemachineCamera camaraCine;
 
@@ -34,9 +35,9 @@ public class CinemaCameraController : MonoBehaviour
         if (splineDolly == null) splineDolly = GetComponent<CinemachineSplineDolly>();
         if (camaraCine == null) camaraCine = GetComponent<CinemachineCamera>();
 
-        if (splineDolly == null || camaraCine == null)
+        if (splineDolly == null || camaraCine == null || CinemachineCamera == null)
         {
-            Debug.LogError("Faltan componentes (Dolly o Camera).");
+            Debug.LogError("Faltan referencias (Dolly, Camera o el GameObject CinemachineCamera).");
             return;
         }
 
@@ -83,7 +84,6 @@ public class CinemaCameraController : MonoBehaviour
 
         if (_listaDeTrabajo.Count > 0)
         {
-            // Si vamos al final, empezamos en index 0. Si vamos al inicio, empezamos en el último index.
             int rotIndex = haciaElFinal ? 0 : _listaDeTrabajo.Count - 1;
             Vector3 initRot = _listaDeTrabajo[rotIndex];
             AplicarRotacion(Quaternion.Euler(initRot), initRot.z);
@@ -105,14 +105,10 @@ public class CinemaCameraController : MonoBehaviour
             tiempo += Time.deltaTime;
             float t = tiempo / duracion;
 
-            // 1. Interpolación de Posición del Dolly
             splineDolly.CameraPosition = Mathf.Lerp(inicioPos, finPos, t);
 
-            // 2. Interpolación de Rotación
             if (_listaDeTrabajo != null && _listaDeTrabajo.Count > 0)
             {
-                // Si vamos hacia el final, usamos 't' (0 a 1)
-                // Si vamos hacia el inicio, invertimos 't' (1 a 0) para leer la lista al revés
                 float tRotacion = haciaElFinal ? t : (1f - t);
                 CalcularYAplicarRotacion(tRotacion);
             }
@@ -120,12 +116,10 @@ public class CinemaCameraController : MonoBehaviour
             yield return null;
         }
 
-        // --- FINALIZACIÓN ---
         splineDolly.CameraPosition = finPos;
 
         if (_listaDeTrabajo != null && _listaDeTrabajo.Count > 0)
         {
-            // Si ibamos al final, forzamos el último elemento. Si ibamos al inicio, forzamos el 0.
             int finalIndex = haciaElFinal ? _listaDeTrabajo.Count - 1 : 0;
             Vector3 finalRot = _listaDeTrabajo[finalIndex];
             AplicarRotacion(Quaternion.Euler(finalRot), finalRot.z);
@@ -164,7 +158,7 @@ public class CinemaCameraController : MonoBehaviour
 
     private void AplicarRotacion(Quaternion rotacion, float dutch)
     {
-        transform.rotation = rotacion;
+        CinemachineCamera.transform.rotation = rotacion;
 
         var lens = camaraCine.Lens;
         lens.Dutch = dutch;
